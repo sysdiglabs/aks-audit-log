@@ -14,7 +14,7 @@ The log exposed in AKS **is not a true Kubernetes audit log**, but a flat file f
 
 **THIS MEANS THAT AT THE TIME OF WRITING, THE FOLLOWING STEPS ARE NOT USEFUL TO ACHIEVE THE INTEGRATION WITH SYSDIG AGENT**
 
-There is a sample of the logs obtained in this way in the [query_data.csv](./query_data) file.
+There is a sample of the logs obtained in this way in the [query_data.csv](./query_data.csv) file.
 
 ## Dependencies
 
