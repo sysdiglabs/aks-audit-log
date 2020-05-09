@@ -47,28 +47,32 @@ namespace AKSKubeAuditReceiver
             await Task.Delay(TimeSpan.FromSeconds(20));
 
             // Stop the processing
-            Console.WriteLine("Stopping processing");
+            Console.WriteLine("\n - Stopping all processors - \n");
             await processor.StopProcessingAsync();
         }
 
         static async Task ProcessEventHandler(ProcessEventArgs eventArgs)
         {
-            Console.WriteLine("Recevied event");
+            string randomName = Guid.NewGuid().ToString("n").Substring(0,8);
+            Console.WriteLine("{0} > Recevied event", randomName);
 
             JObject eventJObj = JObject.Parse(Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
 
             int i = 0;
             foreach (JObject record in eventJObj["records"])
             {
-                Console.Write("{0}: ", i++);
+                //Console.Write("{0}: ", i++);
                 
                 try
                 {
                     JObject kubeAuditEvent = JObject.Parse(record["properties"]["log"].ToString());
-                    Console.Write("{0} ", (string)kubeAuditEvent.SelectToken("user.username"));
-                    Console.Write("{0} ", (string)kubeAuditEvent.SelectToken("verb"));
-                    Console.Write("{0} ", (string)kubeAuditEvent.SelectToken("objectRef.resource"));
-                    Console.Write("{0} ", (string)kubeAuditEvent.SelectToken("objectRef.name"));
+                    Console.WriteLine("{0} {1} > {2} {3} {4} {5}",
+                        randomName,
+                        i++,
+                        (string)kubeAuditEvent.SelectToken("user.username"),
+                        (string)kubeAuditEvent.SelectToken("verb"),
+                        (string)kubeAuditEvent.SelectToken("objectRef.resource"),
+                        (string)kubeAuditEvent.SelectToken("objectRef.name"));
 
                     //Console.WriteLine("\n{0} ", kubeAuditEvent.ToString());
                     //Console.WriteLine("--------------------");
@@ -77,7 +81,7 @@ namespace AKSKubeAuditReceiver
                 {
                     Console.WriteLine("+++++++++++++++++");
                 }
-                Console.WriteLine();
+
                 var values = new Dictionary<string, string>
                 {
                     { "payload", record["properties"]["log"].ToString() }
@@ -88,9 +92,9 @@ namespace AKSKubeAuditReceiver
             }
 
             //Console.WriteLine("{0}", Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
-            Console.WriteLine();
-            Console.WriteLine("============================");
-            Console.WriteLine();
+            //Console.WriteLine();
+            //Console.WriteLine("============================");
+            //Console.WriteLine();
 
             // records.properties.log
 
