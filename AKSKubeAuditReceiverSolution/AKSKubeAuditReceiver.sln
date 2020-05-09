@@ -1,0 +1,17 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AKSKubeAuditReceiver", "AKSKubeAuditReceiver\AKSKubeAuditReceiver.csproj", "{3AFB700A-C808-496D-8FE3-D2F08FB9666D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3AFB700A-C808-496D-8FE3-D2F08FB9666D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AFB700A-C808-496D-8FE3-D2F08FB9666D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AFB700A-C808-496D-8FE3-D2F08FB9666D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AFB700A-C808-496D-8FE3-D2F08FB9666D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
