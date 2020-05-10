@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  akskubeauditreceiver:
+    image: ${DOCKER_REGISTRY-}akskubeauditreceiver
+    build:
+      context: .
+      dockerfile: AKSKubeAuditReceiver/Dockerfile
