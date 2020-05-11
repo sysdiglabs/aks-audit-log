@@ -1,0 +1,23 @@
+apiVersion: apps/v1 # for versions before 1.9.0 use apps/v1beta2
+kind: Deployment
+metadata:
+  name: aks-audit
+  labels:
+    app: aks-audit
+spec:
+  selector:
+    matchLabels:
+      app: aks-audit
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: aks-audit
+    spec:
+      containers:
+      - image: vicenteherrera/test-aksaudit
+        name: aks-audit
+        ports:
+        - containerPort: 80
+          name: aksauditport80
