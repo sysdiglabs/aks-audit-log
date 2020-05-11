@@ -18,7 +18,7 @@ namespace NetCore.Docker
             //}
 
             Console.WriteLine("Starting program");
-            ForwarderRunner runner = new ForwarderRunner();
+            EventHubRunner runner = new EventHubRunner();
             await runner.run();
             Console.WriteLine("Program ended");
         }
