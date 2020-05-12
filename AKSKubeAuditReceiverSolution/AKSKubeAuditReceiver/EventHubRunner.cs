@@ -21,7 +21,7 @@ namespace AKSKubeAuditReceiver
         }
 
         public async Task run() {
-            Console.WriteLine("Executing runner");
+            Console.WriteLine("Starting runner processes");
             string ehubNamespaceConnectionString = ForwarderConfiguration.EhubNamespaceConnectionString;
             string eventHubName = ForwarderConfiguration.EventHubName;
             string blobStorageConnectionString = ForwarderConfiguration.BlobStorageConnectionString;
@@ -44,8 +44,9 @@ namespace AKSKubeAuditReceiver
             Console.WriteLine("Starting proccessors to read Kubernetes audit events from Event Hubs");
             await processor.StartProcessingAsync();
 
-            // Wait for some events to be processed
-            await Task.Delay(TimeSpan.FromSeconds(60 * 6));
+            // Wait for events to be processed
+            //await Task.Delay(TimeSpan.FromSeconds(60));
+            await Task.Delay(-1);
 
             // Stop the processing
             Console.WriteLine("\n - Stopping all processors - \n");
