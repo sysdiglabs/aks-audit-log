@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Config
+clusters:
+- name: falco
+  cluster:
+    #server: http://$AGENT_SERVICE_CLUSTERIP:7765/k8s_audit
+    server: http://10.0.25.84:7765/k8s_audit
+contexts:
+- context:
+    cluster: falco
+    user: ""
+  name: default-context
+current-context: default-context
+preferences: {}
+users: []
