@@ -13,14 +13,14 @@ curl --header "Content-Type: application/json" \
 curl --header "Content-Type: application/json" \
   --request POST \
   --data "{}" \
-  http://sysdig-agent:7765/k8s-audit
+  http://sysdig-agent:7765/k8s_audit
 
 curl --header "Content-Type: application/json" \
   --request POST \
   --data "{}" \
-  http://127.0.0.1:7765/k8s-audit
+  http://127.0.0.1:7765/k8s_audit
 
 curl --header "Content-Type: application/json" \
   --request POST \
   --data "{}" \
-  http://localhost:7765/k8s-audit
+  http://localhost:7765/k8s_audit
