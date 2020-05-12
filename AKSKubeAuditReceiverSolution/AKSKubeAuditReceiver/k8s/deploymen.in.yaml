@@ -18,18 +18,14 @@ spec:
       containers:
       - image: vicenteherrera/test-aksaudit:latest
         name: aks-audit
-        ports:
-        - containerPort: 80
-          name: aksauditport80
         env:
-       - name: EhubNamespaceConnectionString
-         value: "$EhubNamespaceConnectionString"
-       - name: EventHubName
-         value: "$EventHubName"
-       - name: BlobStorageConnectionString
-         value: "$BlobStorageConnectionString"
-       - name: BlobContainerName
-         value: "$BlobContainerName"
-       - name: WebSinkURL
-         value: "$WebSinkURL"
-
+        - name: EhubNamespaceConnectionString
+          value: "$EhubNamespaceConnectionString"
+        - name: EventHubName
+          value: "$EventHubName"
+        - name: BlobStorageConnectionString
+          value: "$BlobStorageConnectionString"
+        - name: BlobContainerName
+          value: "$BlobContainerName"
+        - name: WebSinkURL
+          value: "$WebSinkURL"
