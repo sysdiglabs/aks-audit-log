@@ -94,7 +94,6 @@ function check_az_resources {
 
 function get_region {
     region=$(az aks show -n $cluster_name -g $resource_group --output tsv --query location)
-    echo
     echo "AKS region: $region"
 }
 
@@ -102,6 +101,7 @@ function create_storage_account {
     ## Create storage account
 
     echo "[2/9] Creating storage account $storage_account"
+
     az storage account create \
         --name "$storage_account" \
         --resource-group "$resource_group" \
@@ -153,6 +153,9 @@ function create_diagnostic {
 function create_deployment {
     echo "[8/9] Creating deployment"
 
+    EhubNamespaceConnectionString="$hub_connection_string"
+    BlobStorageConnectionString="$blob_connection_string"
+    
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
       envsubst > deployment.yaml
 
@@ -197,6 +200,8 @@ echo "AKS cluster: $cluster_name"
 check_commands_installed
 check_cluster
 check_az_resources
+
+get_region
 
 create_storage_account
 create_event_hubs
