@@ -33,7 +33,7 @@ namespace AKSKubeAuditReceiver
                     string kubeAuditEventStr = record["properties"]["log"].ToString();
                     if (ForwarderConfiguration.VerboseLevel > 2)
                         ConsoleWriteEventSummary(kubeAuditEventStr, mainEventName, i);
-                    //results.Add(WebhookPoster.SendPost(kubeAuditEventStr, mainEventName, i));
+                    results.Add(WebhookPoster.SendPost(kubeAuditEventStr, mainEventName, i));
                     i++;
                 }
                 catch (Exception)
