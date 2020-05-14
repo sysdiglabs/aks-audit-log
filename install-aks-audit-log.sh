@@ -180,7 +180,7 @@ hub_connection_string=''
 
 # These are populated from command line parameters
 
-if [ "$1" == "" ] || [ "$2" == "" ]; then
+if [ "$#" -lt 2 ]; then
     echo "Error: one or more required parameters missing."
     echo "Usage: "
     echo "  ./install-aks-audit-log-forwarder.sh YOUR_RESOURCE_GROUP YOUR_AKS_CLUSTER_NAME"
