@@ -129,7 +129,7 @@ function create_event_hubs {
         --location "$region" --output none
 
     echo "[6/14] Creating Event Hub $hub_name"
-    az eventhubs eventhub create --name "$hub_name"
+    az eventhubs eventhub create --name "$hub_name" \
         --namespace-name "$ehubs_name" \
         --resource-group "$resource_group" \
         --message-retention 1 \
