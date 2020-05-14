@@ -17,7 +17,6 @@ function check_parameters {
 function check_commands_installed {
     echo "[1/9] Checking requirements"
 
-    # Command line tool requirements
     exists=$(which az)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'az' not available."
@@ -28,10 +27,14 @@ function check_commands_installed {
         echo "Required command line tool 'kubectl' not available."
         exit 1
     fi
-
     exists=$(which envsubst)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'envsubts' not available."
+        exit 1
+    fi
+    exists=$(which curl)
+    if [ "$exists" == "" ]; then
+        echo "Required command line tool 'curl' not available."
         exit 1
     fi
 }
@@ -161,12 +164,12 @@ function create_deployment {
     echo "[8/9] Creating deployment"
     # Create deployment file
     EhubNamespaceConnectionString="$hub_connection_string" BlobStorageConnectionString="$blob_connection_string" \
-    envsubst < deployment.yaml.in > deployment.yaml && kubectl apply -f deployment.yaml
+    curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in | envsubst > deployment.yaml
 
-    echo "[9/9] Applying deployment"
+    echo "[9/9] Applying service and deployment"
+    kubectl apply -f https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/service.yaml
     kubectl apply -f deployment.yaml
 }
-
 
 # ==========================================================================================================
 
@@ -184,6 +187,10 @@ diagnostic_name='auditlogdiagnostic'
 # Output parameters needed
 blob_connection_string=''
 hub_connection_string=''
+
+# These are populated from command line parameters
+resource_group=''
+cluster_name=''
 
 check_commands_installed
 check_cluster
