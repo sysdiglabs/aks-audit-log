@@ -43,7 +43,6 @@ namespace AKSKubeAuditReceiver
                 }
             }
 
-            //TODO: As we do not process errors, we skip the following code to avoid blocking execution
             if (!ok) return false;
             foreach (Task<bool> result in results)
             {
