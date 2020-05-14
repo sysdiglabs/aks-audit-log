@@ -3,7 +3,7 @@
 set -euf
 
 function check_commands_installed {
-    echo "[1/14] Checking requirements"
+    echo "[1/12] Checking requirements"
 
     exists=$(which az)
     if [ "$exists" == "" ]; then
@@ -97,45 +97,25 @@ function get_region {
     echo "AKS region: $region"
 }
 
-function create_storage_account {
-    ## Create storage account
-
-    echo "[9/14] Creating storage account $storage_account"
-
-    az storage account create \
-        --name "$storage_account" \
-        --resource-group "$resource_group" \
-        --location "$region" \
-        --sku Standard_RAGRS \
-        --kind StorageV2 --output none
-
-    echo "[10/14] Getting storage connection string"
-    blob_connection_string=$(az storage account show-connection-string --key primary \
-        --name "$storage_account" \
-        --resource-group "$resource_group" \
-        --output tsv --query connectionString)
-
-    echo "[11/14] Creating blob container $blob_container"
-    az storage container create --name "$blob_container" --connection-string $blob_connection_string --output none
-}
 
 function create_event_hubs {
     ## Create Event Hubs namespace
 
-    echo "[5/14] Creating Event Hubs namespace $ehubs_name"
+    echo "[2/12] Creating Event Hubs namespace $ehubs_name"
     az eventhubs namespace create \
         --name "$ehubs_name" \
         --resource-group "$resource_group" \
         --location "$region" --output none
 
-    echo "[6/14] Creating Event Hub $hub_name"
+    echo "[3/12] Creating Event Hub $hub_name"
     az eventhubs eventhub create --name "$hub_name" \
         --namespace-name "$ehubs_name" \
         --resource-group "$resource_group" \
         --message-retention 1 \
-        --partition-count 4
+        --partition-count 4 \
+        --output none
 
-    echo "[7/14] Getting hub connection string"
+    echo "[4/12] Getting hub connection string"
     sleep 5
     hub_connection_string=$(az eventhubs namespace authorization-rule keys list \
         --resource-group "$resource_group" \
@@ -143,12 +123,12 @@ function create_event_hubs {
         --name RootManageSharedAccessKey \
         --output tsv --query primaryConnectionString)
 
-    echo "[8/14] Getting hub id"
+    echo "[5/12] Getting hub id"
     hub_id=$(az eventhubs namespace show --resource-group "$resource_group" --name "$ehubs_name" --output tsv --query id)
 }
 
 function create_diagnostic {
-    echo "[8/14] Creating diagnostic setting"
+    echo "[6/12] Creating diagnostic setting"
     ## Setting up aks diagnostics to send kube-audit to event hub
     az monitor diagnostic-settings create \
     --resource "$cluster_name" \
@@ -161,8 +141,31 @@ function create_diagnostic {
     --output none
 }
 
+function create_storage_account {
+    ## Create storage account
+
+    echo "[7/12] Creating storage account $storage_account"
+
+    az storage account create \
+        --name "$storage_account" \
+        --resource-group "$resource_group" \
+        --location "$region" \
+        --sku Standard_RAGRS \
+        --kind StorageV2 --output none
+
+    echo "[8/12] Getting storage connection string"
+    blob_connection_string=$(az storage account show-connection-string --key primary \
+        --name "$storage_account" \
+        --resource-group "$resource_group" \
+        --output tsv --query connectionString)
+
+    echo "[9/12] Creating blob container $blob_container"
+    az storage container create --name "$blob_container" --connection-string $blob_connection_string --output none
+}
+
+
 function create_deployment {
-    echo "[12/14] Creating deployment"
+    echo "[10/12] Creating deployment"
 
     EhubNamespaceConnectionString="$hub_connection_string"
     BlobStorageConnectionString="$blob_connection_string"
@@ -170,10 +173,10 @@ function create_deployment {
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
       envsubst > deployment.yaml
 
-    echo "[13/14] Applying service and deployment"
+    echo "[11/12] Applying service and deployment"
     kubectl apply -f https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/service.yaml
 
-    echo "[14/14] Applying service and deployment"
+    echo "[12/12] Applying service and deployment"
     kubectl apply -f deployment.yaml
 }
 
