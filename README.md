@@ -10,7 +10,7 @@ The installation script has some command line tool requirements:
   * kubectl
 
 ```bash
-./install-aks-audit-log-forwarder.sh YOUR_RESOURCE_GROUP_NAME YOUR_AKS_GROUP_NAME
+./install-aks-audit-log.sh YOUR_RESOURCE_GROUP_NAME YOUR_AKS_GROUP_NAME
 ```
 
 Some resources will be created in the same resource group as your cluster:
@@ -22,7 +22,7 @@ Some resources will be created in the same resource group as your cluster:
 ## Uninstallation
 
 ```bash
-./uninstall-aks-audit-log-forwarder.sh YOUR_RESOURCE_GROUP_NAME YOUR_AKS_GROUP_NAME
+./uninstall-aks-audit-log.sh YOUR_RESOURCE_GROUP_NAME YOUR_AKS_GROUP_NAME
 ```
 
 ## Limitations
