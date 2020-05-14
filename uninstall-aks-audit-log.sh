@@ -1,7 +1,5 @@
 #!/bin/bash
 
-set -x
-
 # Required user input
 if [ "$1" == "" ] || [ "$2" == "" ]; then
     echo "Error: one or more required parameters missing."
@@ -30,6 +28,9 @@ echo "AKS cluster: $cluster_name"
 
 echo "Deleting deployment"
 kubectl delete deployment aks-audit-log-forwarder -n sysdig-agent
+
+echo "Deleting service"
+kubectl delete service sysdig-agent -n sysdig-agent
 
 echo "Deleting event hubs namespace"
 az eventhubs namespace delete --resource-group $resource_group --name $ehubs_name --output none
