@@ -4,8 +4,6 @@
 
 This repo show steps to enable the log for Kubernetes commands that Azure exposes for AKS clusters.
 
-**THIS IS A WORK IN PROGRESS**
-
 ## Motivation
 
 We want the Sysdig agent to be able to ingets this log as it does for other managed Kubernetes installations to be able to trigger security policies based on Kubernetes runtime activity.
@@ -21,9 +19,9 @@ Tested with AKS created with Kubernetes version 1.15.10
 ## Steps
 
 1. Create several Azure resources:
-  * Resource Group
-  * Create an Events Hub in the Resource Group
-  * Create a Log Analytics Workspace (take note of the zone used)  
+   * Resource Group
+   * Create an Events Hub in the Resource Group
+   * Create a Log Analytics Workspace (take note of the zone used)  
     We will use it to test queries for the logs, but it's not required. 
 
 2. Create AKS cluster, using a new Log Analytics Workspace in the same Resource Group and using the same zone as the Log Analytics Workspace.  
@@ -68,7 +66,7 @@ kubectl apply -f nginx.yaml
 
 6. Visit Log Analytics workspace  
    Click on the **Logs** section, and run some test queries (you may have to wait a while until results show).
-   Your results should look like the ones from [aks_audit.csv](./aks_audit.csv).
+   Your results should look like the ones from [samples/aks_audit.csv](./aks_audit.csv).
 
 ```
 AzureDiagnostics
@@ -78,26 +76,38 @@ AzureDiagnostics
 
 7. Install Sysdig agent
 
-   * Log into your Sysdig dashboard, click on your profile, and Agent Installation on Settings section.
-   * Copy your Sysdig _access key_ to use for installation.
-   * Install the agent using the [Helm chart](https://github.com/helm/charts/blob/master/stable/sysdig/README.md):
+   * Install the agent using the bash script provided when you create a new Sysdig account at [./install-agent-kubernetes] using:
 
-```
-SYSDIG_AGENT_ACCESS_KEY=<your Sysdig access key>
-helm install sysdig-agent --set sysdig.accessKey=$SYSDIG_AGENT_ACCESS_KEY stable/sysdig \
-  --set auditLog.enabled=true
+   
+```bash
+# Replace <YOUR_SYSDIG_ACCESS_KEY> and <CLUSTER_NAME>
+curl -s https://download.sysdig.com/stable/install-agent-kubernetes | bash -s -- --access_key <YOUR_SYSDIG_ACCESS_KEY> --collector collector.sysdigcloud.com --collector_port 6443 --cluster_name <CLUSTER_NAME> --imageanalyzer
 ```
 
-8. Set up Forwarding in Event Hubs  
-   * Open your Event Hubs in the Resource Group, open your Event Hubs, 
-   * Click on events, and choose "Web Hook"
-   * Fill the details of the Web Hook
-     * Name: SysdigAuditLog (choose an unique name)
-     * Event Schema: Event Grid Schema
-     * Filter to Event Types: Capture File Created
-     * Endpoint type: Web Hook (WIP)
-       * Endpoint: `http://\<endpoint_ip>` (WIP)
+  * Deploy service definition for Sysdig's agent webhook
 
+```bash
+kubectl apply -f service.yaml
+```
+
+
+8. Deploy the AKS Audit Log consumer-forwarder
+
+  * Execute:
+
+```bash
+# Replace YOUR_EVENT_HUB_CONNECTION_STRING and YOUR_BLOB_STORAGE_CONNECTION_STRING
+EhubNamespaceConnectionString="YOUR_EVENT_HUB_CONNECTION_STRING" \
+  BlobStorageConnectionString="YOUR_BLOB_STORAGE_CONNECTION_STRING" \
+  envsubst < deployment.yaml.in > deployment.yaml
+```
+
+  * Wait until it's deployed, and you can check it's logs at:
+  
+```
+kubectl get pods -n sysdig-agent
+kubectl logs <AKS_KUBE_AUDIT_POD_NAME> -n sysdig-agent
+```
 
 ## References
 
