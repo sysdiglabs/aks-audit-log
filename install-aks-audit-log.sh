@@ -189,9 +189,8 @@ blob_connection_string=''
 hub_connection_string=''
 
 # These are populated from command line parameters
-resource_group=''
-cluster_name=''
 
+check_parameters
 check_commands_installed
 check_cluster
 check_az_resources
