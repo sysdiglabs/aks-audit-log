@@ -24,3 +24,7 @@ Some resources will be created in the same resource group as your cluster:
 ```bash
 ./uninstall-aks-audit-log-forwarder.sh YOUR_RESOURCE_GROUP_NAME YOUR_AKS_GROUP_NAME
 ```
+
+## Limitations
+
+The automatic installation can automatically install resources for one AKS cluster in one namespace.
