@@ -109,6 +109,11 @@ helm install sysdig-agent --set sysdig.accessKey=$SYSDIG_AGENT_ACCESS_KEY stable
 
 * [Azure Event Hubs as an Event Grid source](https://docs.microsoft.com/en-us/azure/event-grid/event-schema-event-hubs)
 
+https://docs.microsoft.com/en-us/azure/event-hubs/get-started-dotnet-standard-send-v2#receive-events
+
+(OLD) https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-dotnet-standard-getstarted-send#receive-events
+
+* https://github.com/Azure/azure-event-hubs-go
 
 ### Sysdig documentations and repositories:
 

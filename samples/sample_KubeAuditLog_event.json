@@ -1,0 +1,357 @@
+﻿{
+  "kind": "Event",
+  "apiVersion": "audit.k8s.io/v1",
+  "level": "RequestResponse",
+  "auditID": "71749feb-8e92-43e6-a72f-af6171f811ee",
+  "stage": "ResponseComplete",
+  "requestURI": "/apis/apps/v1/namespaces/kube-system/controllerrevisions/kube-proxy-56987cf666",
+  "verb": "update",
+  "user": {
+    "username": "system:serviceaccount:kube-system:daemon-set-controller",
+    "uid": "45db15ed-8d97-4749-9a3b-834d167f935d",
+    "groups": [
+      "system:serviceaccounts",
+      "system:serviceaccounts:kube-system",
+      "system:authenticated"
+    ]
+  },
+  "sourceIPs": [
+    "172.31.9.19"
+  ],
+  "userAgent": "hyperkube/v1.15.10 (linux/amd64) kubernetes/059c666/system:serviceaccount:kube-system:daemon-set-controller",
+  "objectRef": {
+    "resource": "controllerrevisions",
+    "namespace": "kube-system",
+    "name": "kube-proxy-56987cf666",
+    "uid": "07688068-d8ae-49e4-b660-6fe88d141521",
+    "apiGroup": "apps",
+    "apiVersion": "v1",
+    "resourceVersion": "293957"
+  },
+  "responseStatus": {
+    "metadata": {},
+    "code": 200
+  },
+  "requestObject": {
+    "kind": "ControllerRevision",
+    "apiVersion": "apps/v1",
+    "metadata": {
+      "name": "kube-proxy-56987cf666",
+      "namespace": "kube-system",
+      "selfLink": "/apis/apps/v1/namespaces/kube-system/controllerrevisions/kube-proxy-56987cf666",
+      "uid": "07688068-d8ae-49e4-b660-6fe88d141521",
+      "resourceVersion": "293957",
+      "creationTimestamp": "2020-05-08T22:07:45Z",
+      "labels": {
+        "component": "kube-proxy",
+        "controller-revision-hash": "56987cf666",
+        "tier": "node"
+      },
+      "annotations": {
+        "aks.microsoft.com/release-time": "seconds:1588975656 nanos:979040435 ",
+        "deprecated.daemonset.template.generation": "7",
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"extensions/v1beta1\",\"kind\":\"DaemonSet\",\"metadata\":{\"annotations\":{\"aks.microsoft.com/release-time\":\"seconds:1588975656 nanos:979040435 \"},\"labels\":{\"component\":\"kube-proxy\",\"kubernetes.io/cluster-service\":\"true\",\"tier\":\"node\"},\"name\":\"kube-proxy\",\"namespace\":\"kube-system\"},\"spec\":{\"selector\":{\"matchLabels\":{\"component\":\"kube-proxy\",\"tier\":\"node\"}},\"template\":{\"metadata\":{\"annotations\":{\"aks.microsoft.com/release-time\":\"seconds:1588975656 nanos:979040435 \"},\"labels\":{\"component\":\"kube-proxy\",\"tier\":\"node\"}},\"spec\":{\"affinity\":{\"nodeAffinity\":{\"requiredDuringSchedulingIgnoredDuringExecution\":{\"nodeSelectorTerms\":[{\"labelSelector\":null,\"matchExpressions\":[{\"key\":\"kubernetes.azure.com/cluster\",\"operator\":\"Exists\"}]}]}}},\"containers\":[{\"command\":[\"/hyperkube\",\"kube-proxy\",\"--kubeconfig=/var/lib/kubelet/kubeconfig\",\"--cluster-cidr=10.244.0.0/16\",\"--feature-gates=ExperimentalCriticalPodAnnotation=true\",\"--v=3\"],\"image\":\"mcr.microsoft.com/oss/kubernetes/hyperkube:v1.15.10-hotfix.20200326\",\"name\":\"kube-proxy\",\"resources\":{\"requests\":{\"cpu\":\"100m\"}},\"securityContext\":{\"privileged\":true},\"volumeMounts\":[{\"mountPath\":\"/var/lib/kubelet\",\"name\":\"kubeconfig\",\"readOnly\":true},{\"mountPath\":\"/etc/kubernetes/certs\",\"name\":\"certificates\",\"readOnly\":true},{\"mountPath\":\"/run/xtables.lock\",\"name\":\"iptableslock\"}]}],\"hostNetwork\":true,\"nodeSelector\":{\"beta.kubernetes.io/os\":\"linux\"},\"priorityClassName\":\"system-node-critical\",\"serviceAccountName\":\"kube-proxy\",\"tolerations\":[{\"key\":\"CriticalAddonsOnly\",\"operator\":\"Exists\"},{\"effect\":\"NoExecute\",\"operator\":\"Exists\"},{\"effect\":\"NoSchedule\",\"operator\":\"Exists\"}],\"volumes\":[{\"hostPath\":{\"path\":\"/var/lib/kubelet\"},\"name\":\"kubeconfig\"},{\"hostPath\":{\"path\":\"/etc/kubernetes/certs\"},\"name\":\"certificates\"},{\"hostPath\":{\"path\":\"/run/xtables.lock\",\"type\":\"FileOrCreate\"},\"name\":\"iptableslock\"}]}},\"updateStrategy\":{\"rollingUpdate\":{\"maxUnavailable\":1},\"type\":\"RollingUpdate\"}}}\n"
+      },
+      "ownerReferences": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "DaemonSet",
+          "name": "kube-proxy",
+          "uid": "47222383-5a85-4244-b17f-cce38f314f8f",
+          "controller": true,
+          "blockOwnerDeletion": true
+        }
+      ]
+    },
+    "data": {
+      "spec": {
+        "template": {
+          "$patch": "replace",
+          "metadata": {
+            "annotations": {
+              "aks.microsoft.com/release-time": "seconds:1588975656 nanos:979040435 "
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "component": "kube-proxy",
+              "tier": "node"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "command": [
+                  "/hyperkube",
+                  "kube-proxy",
+                  "--kubeconfig=/var/lib/kubelet/kubeconfig",
+                  "--cluster-cidr=10.244.0.0/16",
+                  "--feature-gates=ExperimentalCriticalPodAnnotation=true",
+                  "--v=3"
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes/hyperkube:v1.15.10-hotfix.20200326",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "kube-proxy",
+                "resources": {
+                  "requests": {
+                    "cpu": "100m"
+                  }
+                },
+                "securityContext": {
+                  "privileged": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/var/lib/kubelet",
+                    "name": "kubeconfig",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/kubernetes/certs",
+                    "name": "certificates",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/run/xtables.lock",
+                    "name": "iptableslock"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "nodeSelector": {
+              "beta.kubernetes.io/os": "linux"
+            },
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kube-proxy",
+            "serviceAccountName": "kube-proxy",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet",
+                  "type": ""
+                },
+                "name": "kubeconfig"
+              },
+              {
+                "hostPath": {
+                  "path": "/etc/kubernetes/certs",
+                  "type": ""
+                },
+                "name": "certificates"
+              },
+              {
+                "hostPath": {
+                  "path": "/run/xtables.lock",
+                  "type": "FileOrCreate"
+                },
+                "name": "iptableslock"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "revision": 11
+  },
+  "responseObject": {
+    "kind": "ControllerRevision",
+    "apiVersion": "apps/v1",
+    "metadata": {
+      "name": "kube-proxy-56987cf666",
+      "namespace": "kube-system",
+      "selfLink": "/apis/apps/v1/namespaces/kube-system/controllerrevisions/kube-proxy-56987cf666",
+      "uid": "07688068-d8ae-49e4-b660-6fe88d141521",
+      "resourceVersion": "296206",
+      "creationTimestamp": "2020-05-08T22:07:45Z",
+      "labels": {
+        "component": "kube-proxy",
+        "controller-revision-hash": "56987cf666",
+        "tier": "node"
+      },
+      "annotations": {
+        "aks.microsoft.com/release-time": "seconds:1588975656 nanos:979040435 ",
+        "deprecated.daemonset.template.generation": "7",
+        "kubectl.kubernetes.io/last-applied-configuration": "{\"apiVersion\":\"extensions/v1beta1\",\"kind\":\"DaemonSet\",\"metadata\":{\"annotations\":{\"aks.microsoft.com/release-time\":\"seconds:1588975656 nanos:979040435 \"},\"labels\":{\"component\":\"kube-proxy\",\"kubernetes.io/cluster-service\":\"true\",\"tier\":\"node\"},\"name\":\"kube-proxy\",\"namespace\":\"kube-system\"},\"spec\":{\"selector\":{\"matchLabels\":{\"component\":\"kube-proxy\",\"tier\":\"node\"}},\"template\":{\"metadata\":{\"annotations\":{\"aks.microsoft.com/release-time\":\"seconds:1588975656 nanos:979040435 \"},\"labels\":{\"component\":\"kube-proxy\",\"tier\":\"node\"}},\"spec\":{\"affinity\":{\"nodeAffinity\":{\"requiredDuringSchedulingIgnoredDuringExecution\":{\"nodeSelectorTerms\":[{\"labelSelector\":null,\"matchExpressions\":[{\"key\":\"kubernetes.azure.com/cluster\",\"operator\":\"Exists\"}]}]}}},\"containers\":[{\"command\":[\"/hyperkube\",\"kube-proxy\",\"--kubeconfig=/var/lib/kubelet/kubeconfig\",\"--cluster-cidr=10.244.0.0/16\",\"--feature-gates=ExperimentalCriticalPodAnnotation=true\",\"--v=3\"],\"image\":\"mcr.microsoft.com/oss/kubernetes/hyperkube:v1.15.10-hotfix.20200326\",\"name\":\"kube-proxy\",\"resources\":{\"requests\":{\"cpu\":\"100m\"}},\"securityContext\":{\"privileged\":true},\"volumeMounts\":[{\"mountPath\":\"/var/lib/kubelet\",\"name\":\"kubeconfig\",\"readOnly\":true},{\"mountPath\":\"/etc/kubernetes/certs\",\"name\":\"certificates\",\"readOnly\":true},{\"mountPath\":\"/run/xtables.lock\",\"name\":\"iptableslock\"}]}],\"hostNetwork\":true,\"nodeSelector\":{\"beta.kubernetes.io/os\":\"linux\"},\"priorityClassName\":\"system-node-critical\",\"serviceAccountName\":\"kube-proxy\",\"tolerations\":[{\"key\":\"CriticalAddonsOnly\",\"operator\":\"Exists\"},{\"effect\":\"NoExecute\",\"operator\":\"Exists\"},{\"effect\":\"NoSchedule\",\"operator\":\"Exists\"}],\"volumes\":[{\"hostPath\":{\"path\":\"/var/lib/kubelet\"},\"name\":\"kubeconfig\"},{\"hostPath\":{\"path\":\"/etc/kubernetes/certs\"},\"name\":\"certificates\"},{\"hostPath\":{\"path\":\"/run/xtables.lock\",\"type\":\"FileOrCreate\"},\"name\":\"iptableslock\"}]}},\"updateStrategy\":{\"rollingUpdate\":{\"maxUnavailable\":1},\"type\":\"RollingUpdate\"}}}\n"
+      },
+      "ownerReferences": [
+        {
+          "apiVersion": "apps/v1",
+          "kind": "DaemonSet",
+          "name": "kube-proxy",
+          "uid": "47222383-5a85-4244-b17f-cce38f314f8f",
+          "controller": true,
+          "blockOwnerDeletion": true
+        }
+      ]
+    },
+    "data": {
+      "spec": {
+        "template": {
+          "$patch": "replace",
+          "metadata": {
+            "annotations": {
+              "aks.microsoft.com/release-time": "seconds:1588975656 nanos:979040435 "
+            },
+            "creationTimestamp": null,
+            "labels": {
+              "component": "kube-proxy",
+              "tier": "node"
+            }
+          },
+          "spec": {
+            "affinity": {
+              "nodeAffinity": {
+                "requiredDuringSchedulingIgnoredDuringExecution": {
+                  "nodeSelectorTerms": [
+                    {
+                      "matchExpressions": [
+                        {
+                          "key": "kubernetes.azure.com/cluster",
+                          "operator": "Exists"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              }
+            },
+            "containers": [
+              {
+                "command": [
+                  "/hyperkube",
+                  "kube-proxy",
+                  "--kubeconfig=/var/lib/kubelet/kubeconfig",
+                  "--cluster-cidr=10.244.0.0/16",
+                  "--feature-gates=ExperimentalCriticalPodAnnotation=true",
+                  "--v=3"
+                ],
+                "image": "mcr.microsoft.com/oss/kubernetes/hyperkube:v1.15.10-hotfix.20200326",
+                "imagePullPolicy": "IfNotPresent",
+                "name": "kube-proxy",
+                "resources": {
+                  "requests": {
+                    "cpu": "100m"
+                  }
+                },
+                "securityContext": {
+                  "privileged": true
+                },
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/var/lib/kubelet",
+                    "name": "kubeconfig",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/etc/kubernetes/certs",
+                    "name": "certificates",
+                    "readOnly": true
+                  },
+                  {
+                    "mountPath": "/run/xtables.lock",
+                    "name": "iptableslock"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "hostNetwork": true,
+            "nodeSelector": {
+              "beta.kubernetes.io/os": "linux"
+            },
+            "priorityClassName": "system-node-critical",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "kube-proxy",
+            "serviceAccountName": "kube-proxy",
+            "terminationGracePeriodSeconds": 30,
+            "tolerations": [
+              {
+                "key": "CriticalAddonsOnly",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoExecute",
+                "operator": "Exists"
+              },
+              {
+                "effect": "NoSchedule",
+                "operator": "Exists"
+              }
+            ],
+            "volumes": [
+              {
+                "hostPath": {
+                  "path": "/var/lib/kubelet",
+                  "type": ""
+                },
+                "name": "kubeconfig"
+              },
+              {
+                "hostPath": {
+                  "path": "/etc/kubernetes/certs",
+                  "type": ""
+                },
+                "name": "certificates"
+              },
+              {
+                "hostPath": {
+                  "path": "/run/xtables.lock",
+                  "type": "FileOrCreate"
+                },
+                "name": "iptableslock"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "revision": 11
+  },
+  "requestReceivedTimestamp": "2020-05-08T22:32:45.314027Z",
+  "stageTimestamp": "2020-05-08T22:32:45.320565Z",
+  "annotations": {
+    "authorization.k8s.io/decision": "allow",
+    "authorization.k8s.io/reason": "RBAC: allowed by ClusterRoleBinding \"system:controller:daemon-set-controller\" of ClusterRole \"system:controller:daemon-set-controller\" to ServiceAccount \"daemon-set-controller/kube-system\""
+  }
+} 

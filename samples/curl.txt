@@ -1,0 +1,26 @@
+﻿curl --header "Content-Type: application/json" \
+  --request POST \
+  --data "{\"kind\":\"Event\",\"apiVersion\":\"audit.k8s.io/v1\",\"level\":\"Metadata\",\"auditID\":\"4e2a4193-cb3d-4ff7-bf37-32c392fbc23b\",\"stage\":\"ResponseComplete\",\"requestURI\":\"/apis/autoscaling/v2beta1?timeout=32s\",\"verb\":\"get\",\"user\":{\"username\":\"system:serviceaccount:kube-system:generic-garbage-collector\",\"uid\":\"30a24f15-2281-4f36-9ecf-83ee9bed45c7\",\"groups\":[\"system:serviceaccounts\",\"system:serviceaccounts:kube-system\",\"system:authenticated\"]},\"sourceIPs\":[\"172.31.9.19\"],\"userAgent\":\"hyperkube/v1.15.10 (linux/amd64) kubernetes/059c666/system:serviceaccount:kube-system:generic-garbage-collector\",\"responseStatus\":{\"metadata\":{},\"code\":200},\"requestReceivedTimestamp\":\"2020-05-08T22:44:17.862201Z\",\"stageTimestamp\":\"2020-05-08T22:44:17.862312Z\",\"annotations\":{\"authorization.k8s.io/decision\":\"allow\",\"authorization.k8s.io/reason\":\"RBAC: allowed by ClusterRoleBinding \\\"system:discovery\\\" of ClusterRole \\\"system:discovery\\\" to Group \\\"system:authenticated\\\"\"}}\n" \
+  http://sysdig-agent.sysdig-agent.svc.cluster.local:7765/k8s_audit
+
+
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data "{}" \
+  http://sysdig-agent.sysdig-agent.svc.cluster.local:7765/k8s_audit
+
+
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data "{}" \
+  http://sysdig-agent:7765/k8s_audit
+
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data "{}" \
+  http://127.0.0.1:7765/k8s_audit
+
+curl --header "Content-Type: application/json" \
+  --request POST \
+  --data "{}" \
+  http://localhost:7765/k8s_audit
