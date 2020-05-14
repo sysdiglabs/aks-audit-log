@@ -189,8 +189,14 @@ blob_connection_string=''
 hub_connection_string=''
 
 # These are populated from command line parameters
+resource_group=""
+cluster_name=""
 
 check_parameters
+
+echo "Resource group: $resource_group"
+echpo "AKS cluster: $cluster_name"
+
 check_commands_installed
 check_cluster
 check_az_resources
