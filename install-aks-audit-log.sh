@@ -65,7 +65,7 @@ function check_az_resources {
 
     echo -n "."
 
-    # exist=$(az monitor diagnostic-settings list --resource AKSAuditLogTestCluster \
+    # exist=$(az monitor diagnostic-settings list --resource "$resource_group" \
     #   --resource-group $resource_group --resource-type "Microsoft.ContainerService/ManagedClusters" --output tsv --query name \
     #   | grep $diagnostic_name)
     # if [ "$exists" != "" ]; then
@@ -152,9 +152,8 @@ function create_diagnostic {
 
 function create_deployment {
     echo "[8/9] Creating deployment"
-    # Create deployment file
-    curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in | \
-      EhubNamespaceConnectionString="$hub_connection_string" BlobStorageConnectionString="$blob_connection_string" \
+
+    curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
       envsubst > deployment.yaml
 
     echo "[9/9] Applying service and deployment"
