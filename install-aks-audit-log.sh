@@ -2,18 +2,6 @@
 
 set -euf
 
-function check_parameters {
-    if [ "$1" == "" || "$2" == "" ]; then
-        echo "Error: one or more required parameters missing."
-        echo "Usage: "
-        echo "  ./install-aks-audit-log-forwarder.sh YOUR_RESOURCE_GROUP YOUR_AKS_CLUSTER_NAME"
-        echo 
-        exit 1
-    fi
-    resource_group="$1"
-    cluster_name="$2"
-}
-
 function check_commands_installed {
     echo "[1/9] Checking requirements"
 
@@ -189,17 +177,25 @@ blob_connection_string=''
 hub_connection_string=''
 
 # These are populated from command line parameters
-resource_group=""
-cluster_name=""
 
-check_parameters
+if [ "$1" == "" || "$2" == "" ]; then
+    echo "Error: one or more required parameters missing."
+    echo "Usage: "
+    echo "  ./install-aks-audit-log-forwarder.sh YOUR_RESOURCE_GROUP YOUR_AKS_CLUSTER_NAME"
+    echo 
+    exit 1
+fi
+resource_group="$1"
+cluster_name="$2"
 
+echo "Installing AKS audit log"
 echo "Resource group: $resource_group"
-echpo "AKS cluster: $cluster_name"
+echo "AKS cluster: $cluster_name"
 
 check_commands_installed
 check_cluster
 check_az_resources
+
 create_storage_account
 create_event_hubs
 create_diagnostic
