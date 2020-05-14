@@ -21,6 +21,11 @@ namespace AKSKubeAuditReceiver
         }
 
         public async Task run() {
+            if ( !ForwarderConfiguration.IsValid())
+            {
+                Console.WriteLine("Invalid configuration");
+                return;
+            }
             Console.WriteLine("Starting runner processes");
             string ehubNamespaceConnectionString = ForwarderConfiguration.EhubNamespaceConnectionString;
             string eventHubName = ForwarderConfiguration.EventHubName;
@@ -41,30 +46,33 @@ namespace AKSKubeAuditReceiver
             processor.ProcessErrorAsync += ProcessErrorHandler;
 
             // Start the processing
-            Console.WriteLine("Starting proccessors to read Kubernetes audit events from Event Hubs");
+            Console.WriteLine("Starting proccessors to read from Event Hubs");
             await processor.StartProcessingAsync();
 
             // Wait for events to be processed
-            //await Task.Delay(TimeSpan.FromSeconds(60));
             await Task.Delay(-1);
+            //TODO: Instead of infinite delay, wait for signal to stop
 
             // Stop the processing
-            Console.WriteLine("\n - Stopping all processors - \n");
+            Console.WriteLine("Stopping all processors");
             await processor.StopProcessingAsync();
         }
 
         static async Task ProcessEventHandler(ProcessEventArgs eventArgs)
         {
             string randomName = Guid.NewGuid().ToString("n").Substring(0, 8);
-            Console.WriteLine("{0} > Received event pack", randomName);
-            HubEventUnpacker.Process(eventArgs, randomName);
+            if (ForwarderConfiguration.VerboseLevel>1)
+                Console.WriteLine("{0} > Received event pack", randomName);
+            bool ok = await HubEventUnpacker.Process(eventArgs, randomName);
+
+            //TODO: Maybe store the event elsewhere if it couldn't be processed
             await eventArgs.UpdateCheckpointAsync(eventArgs.CancellationToken);
         }
 
         Task ProcessErrorHandler(ProcessErrorEventArgs eventArgs)
         {
             // Write details about the error to the console window
-            Console.WriteLine($"\tPartition '{ eventArgs.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
+            Console.WriteLine($"Partition '{ eventArgs.PartitionId}': an unhandled exception was encountered. This was not expected to happen.");
             Console.WriteLine(eventArgs.Exception.Message);
             return Task.CompletedTask;
         }

@@ -16,19 +16,9 @@
     <PackageReference Include="System.Net.Http" Version="4.3.4" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="samples\" />
-    <Folder Include="k8s\" />
-  </ItemGroup>
-  <ItemGroup>
     <None Remove="webhook-config.yaml" />
     <None Remove="webhook-config.in.yaml" />
     <None Remove="audit-sink.yaml.in" />
     <None Remove="audit-sink.yaml" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="k8s\webhook-config.yaml" />
-    <None Include="k8s\webhook-config.in.yaml" />
-    <None Include="k8s\audit-sink.yaml.in" />
-    <None Include="k8s\audit-sink.yaml" />
   </ItemGroup>
 </Project>

@@ -8,6 +8,7 @@ namespace NetCore.Docker
     {
         static async Task Main(string[] args)
         {
+            Console.WriteLine("AKS Kubernetes audit log forwarder from Event Hubs to Sysdig agent");
             Console.WriteLine("Starting program");
             EventHubRunner runner = new EventHubRunner();
             await runner.run();

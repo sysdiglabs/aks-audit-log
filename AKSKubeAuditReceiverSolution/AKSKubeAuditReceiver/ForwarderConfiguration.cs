@@ -12,25 +12,47 @@ namespace AKSKubeAuditReceiver
         public string BlobContainerName;
         public string WebSinkURL;
 
-        public bool ConsoleOutputKubeAuditEvents = true;
-        public bool ConsoleOutputPostResponse = true;
+        public int VerboseLevel = 4;
 
         public void InitConfig()
         {
             EhubNamespaceConnectionString = Environment.GetEnvironmentVariable("EhubNamespaceConnectionString");
-            
             BlobStorageConnectionString = Environment.GetEnvironmentVariable("BlobStorageConnectionString");
+
             BlobContainerName = Environment.GetEnvironmentVariable("BlobContainerName");
+            if (String.IsNullOrEmpty(BlobContainerName)) BlobContainerName = "kubeauditlogcontainer";
 
             EventHubName = Environment.GetEnvironmentVariable("EventHubName");
-            if ( EventHubName == "" ) EventHubName = "insights-logs-kube-audit";
+            if (String.IsNullOrEmpty(EventHubName)) EventHubName = "insights-logs-kube-audit";
 
             WebSinkURL = Environment.GetEnvironmentVariable("WebSinkURL");
-            if ( WebSinkURL == "" ) WebSinkURL = "http://sysdig-agent.sysdig-agent.svc.cluster.local:7765/k8s_audit";
+            if (String.IsNullOrEmpty(WebSinkURL)) WebSinkURL = "http://sysdig-agent.sysdig-agent.svc.cluster.local:7765/k8s_audit";
 
-            EhubNamespaceConnectionString = "Endpoint=sb://kubeauditlogeventhub2.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=u/y6I8F4Y6hyBWhGam6c/3/+l000eEuILcWevcLrss4=";
-            BlobStorageConnectionString = "DefaultEndpointsProtocol=https;AccountName=storagekubeauditlog;AccountKey=9h4BHg+RHXq6K/x4GfZrufGWrJR03jHOjeGMeyQH2oBFIJ5TlmaK5DZ2RkYEW6WNhiD1OzaxfssEO8W0//IV5A==;EndpointSuffix=core.windows.net";
+            if (Environment.GetEnvironmentVariable("VerboseLevel") != "")
+            {
+                try
+                {
+                    VerboseLevel = Int32.Parse(Environment.GetEnvironmentVariable("VerboseLevel"));
+                }
+                catch (Exception) { }
+            }
+
+            if (VerboseLevel > 3)
+            {
+                Console.WriteLine("EventHubName: {0}", EventHubName);
+                Console.WriteLine("BlobContainerName: {0}", BlobContainerName);
+                Console.WriteLine("WebSinkURL: {0}", WebSinkURL);
+                Console.WriteLine("VerboseLevel: {0}", VerboseLevel);
+                Console.WriteLine("EhubNamespaceConnectionString length: {0}", EhubNamespaceConnectionString.Length);
+                Console.WriteLine("BlobStorageConnectionString length: {0}", BlobStorageConnectionString.Length);
+            }
 
         }
+
+        public bool IsValid()
+        {
+            return (EhubNamespaceConnectionString != "" && BlobStorageConnectionString != "");
+        }
+
     }
 }
