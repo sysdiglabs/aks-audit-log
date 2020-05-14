@@ -47,3 +47,4 @@ az monitor diagnostic-settings delete \
 
 echo
 echo "Delete commands sent, it may take some minutes to complete."
+echo
