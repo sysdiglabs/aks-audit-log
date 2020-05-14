@@ -3,7 +3,7 @@
 set -euf
 
 function check_commands_installed {
-    echo "[1/9] Checking requirements"
+    echo "[1/14] Checking requirements"
 
     exists=$(which az)
     if [ "$exists" == "" ]; then
@@ -100,7 +100,7 @@ function get_region {
 function create_storage_account {
     ## Create storage account
 
-    echo "[2/9] Creating storage account $storage_account"
+    echo "[9/14] Creating storage account $storage_account"
 
     az storage account create \
         --name "$storage_account" \
@@ -109,36 +109,46 @@ function create_storage_account {
         --sku Standard_RAGRS \
         --kind StorageV2 --output none
 
-    echo "[3/9] Getting storage connection string"
+    echo "[10/14] Getting storage connection string"
     blob_connection_string=$(az storage account show-connection-string --key primary \
         --name "$storage_account" \
         --resource-group "$resource_group" \
         --output tsv --query connectionString)
 
-    echo "[4/9] Creating blob container $blob_container"
+    echo "[11/14] Creating blob container $blob_container"
     az storage container create --name "$blob_container" --connection-string $blob_connection_string --output none
 }
 
 function create_event_hubs {
     ## Create Event Hubs namespace
 
-    echo "[5/9] Creating Event Hubs $ehubs_name"
+    echo "[5/14] Creating Event Hubs namespace $ehubs_name"
     az eventhubs namespace create \
         --name "$ehubs_name" \
         --resource-group "$resource_group" \
         --location "$region" --output none
 
-    echo "[6/9] Getting hub connection string"
+    echo "[6/14] Creating Event Hub $hub_name"
+    az eventhubs eventhub create --name "$hub_name"
+        --namespace-name "$ehubs_name" \
+        --resource-group "$resource_group" \
+        --message-retention 1 \
+        --partition-count 4
+
+    echo "[7/14] Getting hub connection string"
     sleep 5
     hub_connection_string=$(az eventhubs namespace authorization-rule keys list \
         --resource-group "$resource_group" \
         --namespace-name "$ehubs_name" \
         --name RootManageSharedAccessKey \
         --output tsv --query primaryConnectionString)
+
+    echo "[8/14] Getting hub id"
+    hub_id=$(az eventhubs namespace show --resource-group "$resource_group" --name "$ehubs_name" --output tsv --query id)
 }
 
 function create_diagnostic {
-    echo "[7/9] Creating diagnostic setting"
+    echo "[8/14] Creating diagnostic setting"
     ## Setting up aks diagnostics to send kube-audit to event hub
     az monitor diagnostic-settings create \
     --resource "$cluster_name" \
@@ -146,21 +156,24 @@ function create_diagnostic {
     --resource-type "Microsoft.ContainerService/ManagedClusters" \
     --name "$diagnostic_name" \
     --logs    '[{"category": "kube-audit","enabled": true}]' \
-    --event-hub "$ehubs_name" \
-    --event-hub-rule RootManageSharedAccessKey --output none
+    --event-hub "$hub_name" \
+    --event-hub-rule "${hub_id}/authorizationrules/RootManageSharedAccessKey" \
+    --output none
 }
 
 function create_deployment {
-    echo "[8/9] Creating deployment"
+    echo "[12/14] Creating deployment"
 
     EhubNamespaceConnectionString="$hub_connection_string"
     BlobStorageConnectionString="$blob_connection_string"
-    
+
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
       envsubst > deployment.yaml
 
-    echo "[9/9] Applying service and deployment"
+    echo "[13/14] Applying service and deployment"
     kubectl apply -f https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/service.yaml
+
+    echo "[14/14] Applying service and deployment"
     kubectl apply -f deployment.yaml
 }
 
@@ -180,6 +193,7 @@ diagnostic_name='auditlogdiagnostic'
 # Output parameters needed
 blob_connection_string=''
 hub_connection_string=''
+hub_id=''
 
 # These are populated from command line parameters
 
@@ -203,7 +217,8 @@ check_az_resources
 
 get_region
 
-create_storage_account
+
 create_event_hubs
 create_diagnostic
-create_deployment $blob_connection_string $hub_connection_string
+create_storage_account
+create_deployment
