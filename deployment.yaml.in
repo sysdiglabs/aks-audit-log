@@ -30,6 +30,6 @@ spec:
         - name: WebSinkURL
           value: "http://sysdig-agent.sysdig-agent.svc.cluster.local:7765/k8s_audit"
         - name: VerboseLevel
-          value: "4"
+          value: "3"
 
 
