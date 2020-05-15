@@ -56,7 +56,7 @@ function check_az_resources {
 
     # TODO: avoid usage of grep
     echo -n "."
-    exist=$(az aks show --name "$cluster_name" --resource-group "$resource_group" --query name --output tsv)
+    exists=$(az aks show --name "$cluster_name" --resource-group "$resource_group" --query name --output tsv)
     if [ "$exists" != "$cluster_name" ]; then
         echo
         echo "Can't install, AKS cluster doesn't exists: $cluster_name"
@@ -65,11 +65,12 @@ function check_az_resources {
 
     echo -n "."
 
-    exist=$(az monitor diagnostic-settings show \
+    exists=$(az monitor diagnostic-settings show \
         --name "$diagnostic_name" \
         --resource "$cluster_name" \
         --resource-group "$resource_group" \
-        --resource-type "Microsoft.ContainerService/ManagedClusters" --output none)
+        --resource-type "Microsoft.ContainerService/ManagedClusters" \
+        --output none 2>/dev/null || true)
     if [ "$exists" != "" ]; then
       echo
       echo "Can't install, AKS cluster's diagnostic settting already exists: $diagnostic_name"
@@ -77,16 +78,16 @@ function check_az_resources {
     fi
 
     echo -n "."
-    exist=$(az storage account check-name --name $storage_account --output json --query 'nameAvailable')
-    if [ "$exist" == "false" ]; then
+    exists=$(az storage account check-name --name $storage_account --output json --query 'nameAvailable')
+    if [ "$exists" == "false" ]; then
         echo
         echo "Can't install, resource already exist: Storage Account '$storage_account'"
         exit 1
     fi
 
     echo -n "."
-    exist=$(az eventhubs namespace exists --name $ehubs_name --output json --query 'nameAvailable')
-    if [ "$exist" == "false" ]; then
+    exists=$(az eventhubs namespace exists --name $ehubs_name --output json --query 'nameAvailable')
+    if [ "$exists" == "false" ]; then
         echo
         echo "Can't install, resource already exist: Event Hubs '$ehubs_name'"
         exit 1
