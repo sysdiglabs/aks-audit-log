@@ -4,7 +4,7 @@ set -euf
 
 function check_commands_installed {
     echo "[1/12] Checking requirements"
-
+    local exists
     exists=$(which az)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'az' not available."
@@ -35,13 +35,35 @@ function check_commands_installed {
         echo "Required command line tool 'tr' not available."
         exit 1
     fi
+    exists=$(which grep)
+    if [ "$exists" == "" ]; then
+        echo "Required command line tool 'grep' not available."
+        exit 1
+    fi
 }
 
 function check_cluster {
-    # Sysdig agent installed
-    # Deployment not already in cluster
-    #kubectl get deployment aks-audit-log-forwarder -n sysdig-aget
+
     echo -n "."
+    az aks get-credentials \
+        --name "$cluster_name" \
+        --resource-group "$resource_group" --file - \
+        > tempkubeconfig
+
+    echo -n "."
+    exists=$(KUBECONFIG=tempkubeconfig kubectl get namespaces -o name | grep -w "namespace/sysdig-agent" || true)
+    if [ "$exists" == "" ]; then
+        echo "Couldn't find sysdig-agent namespace in the cluster."
+        exit 1
+    fi;
+
+    echo -n "."
+    exists=$(KUBECONFIG=tempkubeconfig kubectl get deployments -o name | grep -w "deployment.extensions/aks-audit-log-forwarder"  || true)
+    if [ "$exists" != "" ]; then
+        echo "Audit log forwarder deployment already present in the cluster."
+        exit 1
+    fi;
+
 }
 
 function check_az_resources {
@@ -190,11 +212,6 @@ function create_deployment {
       envsubst > deployment.yaml
 
     echo "[11/12] Applying Kubernetes service"
-
-    az aks get-credentials \
-        --name "$cluster_name" \
-        --resource-group "$resource_group" --file - \
-        > tempkubeconfig
 
     KUBECONFIG="tempkubeconfig" kubectl apply \
         -f https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/service.yaml \
