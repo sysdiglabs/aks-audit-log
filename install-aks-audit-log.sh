@@ -40,54 +40,56 @@ function check_az_resources {
     echo -n "."
     azure_account_id=$(az account list --output tsv --query [0].id)
     if [ "$azure_account_id" == "" ]; then
-    echo
-    echo "Can't get Azure account id. Try executing 'az login'"
-    exit 1
+        echo
+        echo "Can't get Azure account id. Try executing 'az login'"
+        exit 1
     fi
 
     echo -n "."
     exists=$(az group exists --name "$resource_group")
     if [ "$exists" == "false" ]; then
-    echo
-    echo "Can't install, resource group doesn't exists: $resource_group"
-    exit 1
+        echo
+        echo "Can't install, resource group doesn't exists: $resource_group"
+        exit 1
     fi
 
 
     # TODO: avoid usage of grep
     echo -n "."
-    exist=$(az aks list --resource-group "$resource_group" --output json --query '[].name' | grep "$cluster_name")
-    if [ "$exists" == "" ]; then
-    echo
-    echo "Can't install, AKS cluster doesn't exists: $cluster_name"
-    exit 1
+    exist=$(az aks show --name "$cluster_name" --resource-group "$resource_group" --query name --output tsv)
+    if [ "$exists" != "$cluster_name" ]; then
+        echo
+        echo "Can't install, AKS cluster doesn't exists: $cluster_name"
+        exit 1
     fi
 
     echo -n "."
 
-    # exist=$(az monitor diagnostic-settings list --resource "$resource_group" \
-    #   --resource-group $resource_group --resource-type "Microsoft.ContainerService/ManagedClusters" --output tsv --query name \
-    #   | grep $diagnostic_name)
-    # if [ "$exists" != "" ]; then
-    #   echo
-    #   echo "Can't install, AKS cluster's diagnostic settting already exists: $exist"
-    #   exit 1
-    # fi
+    exist=$(az monitor diagnostic-settings show \
+        --name "$diagnostic_name" \
+        --resource "$cluster_name" \
+        --resource-group "$resource_group" \
+        --resource-type "Microsoft.ContainerService/ManagedClusters" --output none)
+    if [ "$exists" != "" ]; then
+      echo
+      echo "Can't install, AKS cluster's diagnostic settting already exists: $diagnostic_name"
+      exit 1
+    fi
 
     echo -n "."
     exist=$(az storage account check-name --name $storage_account --output json --query 'nameAvailable')
     if [ "$exist" == "false" ]; then
-    echo
-    echo "Can't install, resource already exist: Storage Account '$storage_account'"
-    exit 1
+        echo
+        echo "Can't install, resource already exist: Storage Account '$storage_account'"
+        exit 1
     fi
 
     echo -n "."
     exist=$(az eventhubs namespace exists --name $ehubs_name --output json --query 'nameAvailable')
     if [ "$exist" == "false" ]; then
-    echo
-    echo "Can't install, resource already exist: Event Hubs '$ehubs_name'"
-    exit 1
+        echo
+        echo "Can't install, resource already exist: Event Hubs '$ehubs_name'"
+        exit 1
     fi
     echo
 }
