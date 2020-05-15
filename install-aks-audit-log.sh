@@ -8,21 +8,31 @@ function check_commands_installed {
     exists=$(which az)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'az' not available."
+        echo "For instructions on how to install it, visit:"
+        ecbo "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest"
         exit 1
     fi
     exists=$(which kubectl)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'kubectl' not available."
+        echo "Yoy may install it using:"
+        echo "  az aks install-cli"
         exit 1
     fi
     exists=$(which envsubst)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'envsubts' not available."
+        echo "You may find it in the gettext or gettext-base packages."
         exit 1
     fi
     exists=$(which curl)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'curl' not available."
+        exit 1
+    fi
+    exists=$(which tr)
+    if [ "$exists" == "" ]; then
+        echo "Required command line tool 'tr' not available."
         exit 1
     fi
 }
@@ -104,13 +114,13 @@ function get_region {
 function create_event_hubs {
     ## Create Event Hubs namespace
 
-    echo "[2/12] Creating Event Hubs namespace $ehubs_name"
+    echo "[2/12] Creating Event Hubs namespace: $ehubs_name"
     az eventhubs namespace create \
         --name "$ehubs_name" \
         --resource-group "$resource_group" \
         --location "$region" --output none
 
-    echo "[3/12] Creating Event Hub $hub_name"
+    echo "[3/12] Creating Event Hub: $hub_name"
     az eventhubs eventhub create --name "$hub_name" \
         --namespace-name "$ehubs_name" \
         --resource-group "$resource_group" \
@@ -131,7 +141,7 @@ function create_event_hubs {
 }
 
 function create_diagnostic {
-    echo "[6/12] Creating diagnostic setting"
+    echo "[6/12] Creating diagnostic setting: $diagnostic_name"
     ## Setting up aks diagnostics to send kube-audit to event hub
     az monitor diagnostic-settings create \
     --resource "$cluster_name" \
@@ -147,7 +157,7 @@ function create_diagnostic {
 function create_storage_account {
     ## Create storage account
 
-    echo "[7/12] Creating storage account $storage_account"
+    echo "[7/12] Creating storage account: $storage_account"
 
     az storage account create \
         --name "$storage_account" \
@@ -162,13 +172,16 @@ function create_storage_account {
         --resource-group "$resource_group" \
         --output tsv --query connectionString)
 
-    echo "[9/12] Creating blob container $blob_container"
-    az storage container create --name "$blob_container" --connection-string $blob_connection_string --output none
+    echo "[9/12] Creating blob container: $blob_container"
+    az storage container create \
+        --name "$blob_container" \
+        --connection-string $blob_connection_string \
+        --output none
 }
 
 
 function create_deployment {
-    echo "[10/12] Creating deployment"
+    echo "[10/12] Creating deployment manifest"
 
     EhubNamespaceConnectionString="$hub_connection_string"
     BlobStorageConnectionString="$blob_connection_string"
@@ -176,32 +189,28 @@ function create_deployment {
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
       envsubst > deployment.yaml
 
-    echo "[11/12] Applying service and deployment"
-    kubectl apply -f https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/service.yaml
+    echo "[11/12] Applying Kubernetes service"
 
-    echo "[12/12] Applying service and deployment"
-    kubectl apply -f deployment.yaml
+    az aks get-credentials \
+        --name "$cluster_name" \
+        --resource-group "$resource_group" --file - \
+        > tempkubeconfig
+
+    KUBECONFIG="tempkubeconfig" kubectl apply \
+        -f https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/service.yaml \
+        -n sysdig-agent
+
+    echo "[12/12] Applying Kubernetes deployment"
+    KUBECONFIG="tempkubeconfig" kubectl apply -f deployment.yaml -n sysdig-agent
+
+    #rm tempkubeconfig
 }
 
 # ==========================================================================================================
 
 # MAIN EXECUTION
 
-# Default resource names (might autogenerate hashed names)
-storage_account='kubeauditlogstorage'
-ehubs_name='AKSAuditLogEventHubs'
-
-# Default unchanged values
-blob_container='kubeauditlogcontainer'
-hub_name='insights-logs-kube-audit'
-diagnostic_name='auditlogdiagnostic'
-
-# Output parameters needed
-blob_connection_string=''
-hub_connection_string=''
-hub_id=''
-
-# These are populated from command line parameters
+# Command line parameters
 
 if [ "$#" -lt 2 ]; then
     echo "Error: one or more required parameters missing."
@@ -213,16 +222,35 @@ fi
 resource_group="$1"
 cluster_name="$2"
 
+# Hash from cluster name for resources
+hash=$(echo -n "${cluster_name}${resource_group}" | md5sum)
+hash="${hash:0:4}"
+
+# Default resource names
+storage_account=$(echo "${cluster_name}" | tr '[:upper:]' '[:lower:]')
+storage_account="${storage_account:0:20}${hash}"
+ehubs_name="${cluster_name:0:46}${hash}"
+
+# Default unchanged values
+blob_container='kubeauditlogcontainer'
+hub_name='insights-logs-kube-audit'
+diagnostic_name='auditlogdiagnostic'
+
+# Output parameters needed
+blob_connection_string=''
+hub_connection_string=''
+hub_id=''
+
 echo "Installing AKS audit log"
 echo "Resource group: $resource_group"
 echo "AKS cluster: $cluster_name"
+echo "Using resource names suffix: $hash"
 
 check_commands_installed
 check_cluster
 check_az_resources
 
 get_region
-
 
 create_event_hubs
 create_diagnostic
