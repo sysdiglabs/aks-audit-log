@@ -5,18 +5,21 @@ using System.Threading.Tasks;
 
 namespace AKSKubeAuditReceiver
 {
-    class WebhookPoster
+    public class WebhookPoster
     {
 
         private ForwarderConfiguration ForwarderConfiguration;
-        private HttpClient HttpClient;
+        public IHttpHandler HttpClient=null;
 
         public WebhookPoster(ForwarderConfiguration forwarderConfiguration)
         {
             ForwarderConfiguration = forwarderConfiguration;
-            HttpClient = new HttpClient();
         }
-        
+
+        public void InitConig()
+        {
+            if (HttpClient == null) HttpClient = new HttpClientHandler();
+        }
         public async Task<bool> SendPost(string kubeAuditEventStr, string mainEventName = "", int eventNumber = 0)
         {
             try
