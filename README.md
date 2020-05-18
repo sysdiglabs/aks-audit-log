@@ -8,6 +8,7 @@ The installation script has some command line tool requirements:
   * Azure-cli (already logged into your account)
   * envsubst
   * kubectl
+  * curl, tr, grep
 
 ```bash
 curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/install-aks-audit-log.sh | bash -s -- YOUR_RESOURCE_GROUP_NAME YOUR_AKS_CLUSTER_NAME
@@ -24,7 +25,3 @@ Some resources will be created in the same resource group as your cluster:
 ```bash
 curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/uninstall-aks-audit-log.sh | bash -s -- YOUR_RESOURCE_GROUP_NAME YOUR_AKS_CLUSTER_NAME
 ```
-
-## Limitations
-
-The automatic installation can automatically install resources for one AKS cluster in one namespace.
