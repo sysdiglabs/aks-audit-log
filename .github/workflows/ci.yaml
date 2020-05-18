@@ -1,0 +1,39 @@
+name: CI
+on: 
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
+  page_build:
+    release:
+      types:
+        - created
+
+jobs:
+  check:
+    runs-on: ubuntu-16.04
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v2
+      
+      - name: Create environment
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.100' # SDK Version to use.
+      
+      - name: Linter problem catcher
+        uses: xt0rted/dotnet-format-problem-matcher@v1
+
+      - name: Lint
+        run: dotnet format --folder AKSKubeAuditReceiverSolution/ --dry-run
+
+      - name: Build
+        run: dotnet build AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
+
+      - name: Test
+        run: dotnet test AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
+
+      # - name: Build && upload container with SHA-1
