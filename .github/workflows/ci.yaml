@@ -24,6 +24,9 @@ jobs:
         with:
           dotnet-version: '3.1.100' # SDK Version to use.
       
+      - name: Install dotnet-format for linting
+        run: dotnet tool install -g dotnet-format
+
       - name: Linter problem catcher
         uses: xt0rted/dotnet-format-problem-matcher@v1
 
