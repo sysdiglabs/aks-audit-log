@@ -20,8 +20,9 @@ namespace AKSKubeAuditReceiver
             HubEventUnpacker = new HubEventUnpacker(ForwarderConfiguration);
         }
 
-        public async Task run() {
-            if ( !ForwarderConfiguration.IsValid())
+        public async Task run()
+        {
+            if (!ForwarderConfiguration.IsValid())
             {
                 Console.WriteLine("Invalid configuration");
                 return;
@@ -61,7 +62,7 @@ namespace AKSKubeAuditReceiver
         static async Task ProcessEventHandler(ProcessEventArgs eventArgs)
         {
             string randomName = Guid.NewGuid().ToString("n").Substring(0, 8);
-            if (ForwarderConfiguration.VerboseLevel>1)
+            if (ForwarderConfiguration.VerboseLevel > 1)
                 Console.WriteLine("{0} > Received event pack", randomName);
             bool ok = await HubEventUnpacker.Process(eventArgs, randomName);
 

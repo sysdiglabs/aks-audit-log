@@ -9,7 +9,7 @@ namespace AKSKubeAuditReceiver
     {
 
         private ForwarderConfiguration ForwarderConfiguration;
-        public IHttpHandler HttpClient=null;
+        public IHttpHandler HttpClient = null;
 
         public WebhookPoster(ForwarderConfiguration forwarderConfiguration)
         {
@@ -39,7 +39,8 @@ namespace AKSKubeAuditReceiver
                     if (responseString == "<html><body>Ok</body></html>")
                     {
                         Console.WriteLine("{0} {1} > Response OK", mainEventName, eventNumber);
-                    } else
+                    }
+                    else
                     {
                         Console.WriteLine("{0} {1} > Response: {2}", mainEventName, eventNumber, responseString);
                     }

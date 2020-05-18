@@ -38,7 +38,7 @@ namespace AKSKubeAuditTests
 
             Mock<IHttpHandler> fakeHttpClient = getFakeHttpClient_returnAccepted();
             var webhookPoster = new WebhookPoster(ForwarderConfiguration);
-            webhookPoster.HttpClient = (IHttpHandler) fakeHttpClient.Object;
+            webhookPoster.HttpClient = (IHttpHandler)fakeHttpClient.Object;
 
             await webhookPoster.SendPost(kubeEvent);
 

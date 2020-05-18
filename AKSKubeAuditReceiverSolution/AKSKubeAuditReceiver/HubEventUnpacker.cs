@@ -17,7 +17,8 @@ namespace AKSKubeAuditReceiver
             WebhookPoster = new WebhookPoster(forwarderConfiguration);
         }
 
-        public async Task<bool> Process(ProcessEventArgs eventArgs, string mainEventName = "") {
+        public async Task<bool> Process(ProcessEventArgs eventArgs, string mainEventName = "")
+        {
 
             JObject eventJObj = JObject.Parse(Encoding.UTF8.GetString(eventArgs.Data.Body.ToArray()));
 
@@ -52,7 +53,7 @@ namespace AKSKubeAuditReceiver
             return ok;
         }
 
-        private void ConsoleWriteEventSummary(string kubeAuditEventStr, string mainEventName="", int eventNumber=0)
+        private void ConsoleWriteEventSummary(string kubeAuditEventStr, string mainEventName = "", int eventNumber = 0)
         {
             JObject kubeAuditEvent = JObject.Parse(kubeAuditEventStr);
             Console.WriteLine("{0} {1} > {2} {3} {4} {5}",
