@@ -35,20 +35,20 @@ namespace AKSKubeAuditReceiver
                 if (ForwarderConfiguration.VerboseLevel > 3)
                 {
                     //TODO: Info user that requesting result log makes the POST run sync, which will be slower
-                    string responseString = await response.Content.ReadAsStringAsync();
-                    if (responseString == "<html><body>Ok</body></html>")
+                    
+                    if ( response.IsSuccessStatusCode == true )
                     {
-                        Console.WriteLine("{0} {1} > Response OK", mainEventName, eventNumber);
+                        Console.WriteLine("{0} {1} > Post response OK", mainEventName, eventNumber);
                     }
                     else
                     {
-                        Console.WriteLine("{0} {1} > Response: {2}", mainEventName, eventNumber, responseString);
+                        Console.WriteLine("{0} {1} > **Error post response: {2}", mainEventName, eventNumber, response.Content.ToString());
                     }
                 }
             }
             catch (Exception e)
             {
-                Console.WriteLine("{0} {1} > POST error: {2}",
+                Console.WriteLine("{0} {1} > **Error sending post: {2}",
                     mainEventName, eventNumber, e.Message);
                 return false;
             }
