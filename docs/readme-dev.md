@@ -23,6 +23,10 @@ We evaluated to use a go Event Hubs client library, but it required to create a 
 
 You also need additional resources specified in the architecture diagram to be able to access and process the Kubernetes audit log for an AKS cluster.
 
+A standard AKS cluster with 3 nodes and no workload will need less than 1 Mb/s of bandwidth to provide the audit log. In the case that the forwarder stops working, events will be stored in the hub until cosumed when it continues execution, as seen in the following figure.
+
+![Kube audit events bandwidth](events-bandwidth.png)
+
 ## Dependencies
 
 Tested with AKS created with Kubernetes version 1.15.10
