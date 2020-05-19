@@ -2,27 +2,39 @@
 
 ## Introduction
 
-This repo show steps to enable the log for Kubernetes commands that Azure exposes for AKS clusters.
+This is de developmend documentation for the _AKS audit log_ integration. To read the _user documentation_, check the [main README.md] of this repo.
 
 ## Motivation
 
-We want the Sysdig agent to be able to ingets this log as it does for other managed Kubernetes installations to be able to trigger security policies based on Kubernetes runtime activity.
+Sysdig Secure can do detections based on runtime security policies for Kubernetes commands. To be able to do so, it has to receive the Kubernetes audit log.
 
-## Summary
+In vanilla Kubernetes installations, you can tell the Kubernetes API server to send it to the Sysdig agent. For managed clusters, each cloud provider requires different steps to be able for the Sysdig agent to receive the log.
 
-There is a sample of the logs obtained in this way in the [aks_audit.csv](./aks_audit.csv) file.
+
+## Architecture
+
+![AKS audit log architecture diagram](aks_audit_log_architecture.png)
+
+## Implementation
+
+The [AKSKubeAuditReceiverSolution](../AKSKubeAuditReceiverSolution) has been implemented using .NET core 3.1. And is packaged in a container image that you deploy in the AKS cluster.
+
+We evaluated to use a go Event Hubs client library, but it required to create a specific Service Account for it, which is something that can be problematic in environments where the user doesn't have owner access to the whole Azure account.
+
+You also need additional resources specified in the architecture diagram to be able to access and process the Kubernetes audit log for an AKS cluster.
 
 ## Dependencies
 
 Tested with AKS created with Kubernetes version 1.15.10
 
-## Steps
+
+## Manual deployment
 
 1. Create several Azure resources:
    * Resource Group
    * Create an Events Hub in the Resource Group
    * Create a Log Analytics Workspace (take note of the zone used)  
-    We will use it to test queries for the logs, but it's not required. 
+    We will use it to test queries for the logs, but _it's not required_. 
 
 2. Create AKS cluster, using a new Log Analytics Workspace in the same Resource Group and using the same zone as the Log Analytics Workspace.  
 Take into consideration that if you create the Log Analytics in the same step that the AKS cluster, it will not be created in your Resource group, even if it says it will be.
@@ -111,7 +123,7 @@ kubectl logs <AKS_KUBE_AUDIT_POD_NAME> -n sysdig-agent
 
 ## References
 
-### Main Azure documendation:
+### Azure documendation:
 
 * [Enable and review Kubernetes master node logs in Azure Kubernetes Service (AKS)](https://docs.microsoft.com/en-us/azure/aks/view-master-logs)
 
@@ -119,11 +131,11 @@ kubectl logs <AKS_KUBE_AUDIT_POD_NAME> -n sysdig-agent
 
 * [Azure Event Hubs as an Event Grid source](https://docs.microsoft.com/en-us/azure/event-grid/event-schema-event-hubs)
 
-https://docs.microsoft.com/en-us/azure/event-hubs/get-started-dotnet-standard-send-v2#receive-events
+* [Azure Event Hubs receive events](https://docs.microsoft.com/en-us/azure/event-hubs/get-started-dotnet-standard-send-v2#receive-events)
 
-(OLD) https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-dotnet-standard-getstarted-send#receive-events
+* [Azure Event Hubs receive events (old version, more detailed)](https://docs.microsoft.com/en-us/azure/event-hubs/event-hubs-dotnet-standard-getstarted-send#receive-events)
 
-* https://github.com/Azure/azure-event-hubs-go
+* [Azure Events Hubs go library client](https://github.com/Azure/azure-event-hubs-go)
 
 ### Sysdig documentations and repositories:
 
@@ -135,7 +147,7 @@ https://docs.microsoft.com/en-us/azure/event-hubs/get-started-dotnet-standard-se
 
 * [GitHub repo: GKE Kubernetes audit log integration](https://github.com/sysdiglabs/stackdriver-webhook-bridge)
 
-### Related documentation:
+### Other related documentation:
 
 * [GitHub repo folder: Falco samples for Kubernetes audit log events](https://github.com/falcosecurity/falco/tree/master/test/trace_files/k8s_audit)
 
