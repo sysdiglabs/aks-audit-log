@@ -205,11 +205,13 @@ function create_storage_account {
 function create_deployment {
     echo "[10/12] Creating deployment manifest"
 
-    EhubNamespaceConnectionString="$hub_connection_string"
-    BlobStorageConnectionString="$blob_connection_string"
+    export EhubNamespaceConnectionString="$hub_connection_string"
+    export BlobStorageConnectionString="$blob_connection_string"
 
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
       envsubst > deployment.yaml
+
+    
 
     echo "[11/12] Applying Kubernetes service"
 
@@ -218,9 +220,12 @@ function create_deployment {
         -n sysdig-agent
 
     echo "[12/12] Applying Kubernetes deployment"
+    
+    export KUBECONFIG="tempkubeconfig"
     KUBECONFIG="tempkubeconfig" kubectl apply -f deployment.yaml -n sysdig-agent
 
-    #rm tempkubeconfig
+    rm tempkubeconfig
+    rm deployment.yaml
 }
 
 # ==========================================================================================================
