@@ -18,6 +18,7 @@ namespace AKSKubeAuditReceiver
             ForwarderConfiguration = new ForwarderConfiguration();
             ForwarderConfiguration.InitConfig();
             HubEventUnpacker = new HubEventUnpacker(ForwarderConfiguration);
+            HubEventUnpacker.InitConfig();
         }
 
         public async Task run()
@@ -51,6 +52,8 @@ namespace AKSKubeAuditReceiver
             // Start the processing
             Console.WriteLine("Starting proccessors to read from Event Hubs");
             await processor.StartProcessingAsync();
+
+            Console.WriteLine("Ready and waiting to handle events");
 
             // Wait for events to be processed
             await Task.Delay(-1);

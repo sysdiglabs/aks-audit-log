@@ -21,6 +21,7 @@ namespace AKSKubeAuditReceiver
             if ( WebhookPoster == null )
             {
                 WebhookPoster = new WebhookPoster(ForwarderConfiguration);
+                WebhookPoster.InitConfig();
             }
         }
 
@@ -45,9 +46,12 @@ namespace AKSKubeAuditReceiver
                 try
                 {
                     string kubeAuditEventStr = record["properties"]["log"].ToString();
+
                     if (ForwarderConfiguration.VerboseLevel > 2)
                         ConsoleWriteEventSummary(kubeAuditEventStr, mainEventName, i);
+
                     results.Add(WebhookPoster.SendPost(kubeAuditEventStr, mainEventName, i));
+
                     i++;
                 }
                 catch (Exception e)
@@ -79,7 +83,7 @@ namespace AKSKubeAuditReceiver
                     (string)kubeAuditEvent.SelectToken("objectRef.name"));
             } catch(Exception e)
             {
-                Console.WriteLine("{0} {1} > Error parsing kube event, will send anyways: {2}",
+                Console.WriteLine("{0} {1} > **Error parsing kube event, will send anyways: {2}",
                     mainEventName, eventNumber, e.Message);
             }
         }
