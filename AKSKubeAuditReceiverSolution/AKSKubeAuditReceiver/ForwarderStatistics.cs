@@ -1,9 +1,4 @@
 ﻿using Prometheus;
-using System;
-using System.Diagnostics;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace AKSKubeAuditReceiver
 {
@@ -24,9 +19,9 @@ namespace AKSKubeAuditReceiver
 
         public static void InitServer()
         {
+            var diagnosticSourceRegistration = DiagnosticSourceAdapter.StartListening();
 
-            Server = new MetricServer(hostname: "localhost", port: 1234);
-
+            Server = new MetricServer(port: 1234);
             Server.Start();
         }
 
