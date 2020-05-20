@@ -85,13 +85,11 @@ function check_az_resources {
         exit 1
     fi
 
-
-    # TODO: avoid usage of grep
     echo -n "."
     exists=$(az aks show --name "$cluster_name" --resource-group "$resource_group" --query name --output tsv)
     if [ "$exists" != "$cluster_name" ]; then
         echo
-        echo "Can't install, AKS cluster doesn't exists: $cluster_name"
+        echo "Can't install, AKS cluster was not found: $cluster_name"
         exit 1
     fi
 
@@ -110,18 +108,27 @@ function check_az_resources {
     fi
 
     echo -n "."
-    exists=$(az storage account check-name --name $storage_account --output json --query 'nameAvailable')
+    exists=$(az storage account check-name --name "$storage_account" --output json --query 'nameAvailable')
     if [ "$exists" == "false" ]; then
         echo
-        echo "Can't install, resource already exist: Storage Account '$storage_account'"
+        echo "Can't install, resource name not valid: Storage Account '$storage_account'"
         exit 1
     fi
 
     echo -n "."
-    exists=$(az eventhubs namespace exists --name $ehubs_name --output json --query 'nameAvailable')
+    exists=$(az storage account show --name "$storage_account" --query name -o tsv || true)
+    if [ "$exists" != "" ]; then
+        echo
+        echo "Can't install, resource already exists: Storage Account '$storage_account'"
+        exit 1
+    fi
+
+
+    echo -n "."
+    exists=$(az eventhubs namespace exists --name "$ehubs_name" --output json --query 'nameAvailable')
     if [ "$exists" == "false" ]; then
         echo
-        echo "Can't install, resource already exist: Event Hubs '$ehubs_name'"
+        echo "Can't install, resource already exists: Event Hubs '$ehubs_name'"
         exit 1
     fi
     echo
@@ -252,7 +259,6 @@ hash="${hash:0:4}"
 # Default resource names
 storage_account=$(echo "${cluster_name}" | tr '[:upper:]' '[:lower:]')
 storage_account=$(echo $storage_account | tr -cd '[a-zA-Z0-9]')
-# TODO: Remove all non supported characters for storage account
 storage_account="${storage_account:0:20}${hash}"
 ehubs_name="${cluster_name:0:46}${hash}"
 
