@@ -7,8 +7,8 @@ This repository contains an installation/uninstallation script, instructions and
 ## Installation
 
 The installation script has some command line tool requirements:
-  * Azure-cli (already logged into your account)
-  * envsubst
+  * [Azure-cli](https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest) (already logged into your account)
+  * envsubst (shipped with gettext package)
   * kubectl
   * curl, tr, grep
 
