@@ -1,29 +1,47 @@
-﻿using System;
+﻿using Prometheus;
+using System;
+using System.Diagnostics;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
+
 namespace AKSKubeAuditReceiver
 {
     public static class ForwarderStatistics
     {
-        public static UInt64 Errors = 0;
-        public static UInt64 Successes = 0;
-        public static UInt64 Sent = 0;
+
+        private static readonly Counter Sent =
+            Metrics.CreateCounter("sysdig_aks_audit_log_kube_events", "Total number of kube events sent");
+
+        private static readonly Counter Errors =
+            Metrics.CreateCounter("sysdig_aks_audit_log_kube_events_error", "Total number of kube events sent with error result");
+
+        private static readonly Counter Successes =
+            Metrics.CreateCounter("sysdig_aks_audit_log_kube_events_error", "Total number of kube events sent with success result");
+
+        private static MetricServer Server;
+        //private static KestrelMetricServer Server;
+
+        public static void InitServer()
+        {
+
+            Server = new MetricServer(hostname: "localhost", port: 1234);
+
+            Server.Start();
+        }
 
         public static void IncreaseSuccesses()
         {
-            Successes++;
+            Successes.Inc();
         }
         public static void IncreaseErrors()
         {
-            Errors++;
+            Errors.Inc();
         }
         public static void IncreaseSent()
         {
-            Errors++;
+            Sent.Inc();
         }
-        public static void PeriodicOutput()
-        {
-            Console.WriteLine("Stats > {0} errors, {0} successes, {0} sent, {0} waiting",
-                Errors, Successes, Sent, Sent - Successes - Errors);
 
-        }
     }
 }

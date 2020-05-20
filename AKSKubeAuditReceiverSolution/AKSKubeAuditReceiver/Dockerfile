@@ -17,4 +17,5 @@ RUN dotnet publish "AKSKubeAuditReceiver.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+EXPOSE 1234
 ENTRYPOINT ["dotnet", "AKSKubeAuditReceiver.dll"]
