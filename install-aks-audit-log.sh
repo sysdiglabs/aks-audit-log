@@ -251,7 +251,7 @@ hash="${hash:0:4}"
 
 # Default resource names
 storage_account=$(echo "${cluster_name}" | tr '[:upper:]' '[:lower:]')
-storage_account=$(echo | tr -d -)
+storage_account=$(echo $storage_account | tr -cd '[a-zA-Z0-9]')
 # TODO: Remove all non supported characters for storage account
 storage_account="${storage_account:0:20}${hash}"
 ehubs_name="${cluster_name:0:46}${hash}"
@@ -266,10 +266,29 @@ blob_connection_string=''
 hub_connection_string=''
 hub_id=''
 
-echo "Installing AKS audit log"
-echo "Resource group: $resource_group"
-echo "AKS cluster: $cluster_name"
-echo "Using resource names suffix: $hash"
+
+echo "This script will install resources to forward AKS audit log to Sysdig Secure"
+echo
+echo "Destination:"
+echo "  * Resource group: $resource_group"
+echo "  * AKS cluster: $cluster_name"
+echo "Resources to install:"
+echo "  * Activate diagnostic setting $diagnostic_name in the cluster"
+echo "  * Storage account: $storage_account"
+echo "    * Blob container: $blob_container"
+echo "  * Event Hubs namespace: $ehubs_name"
+echo "    * Hub namespace: $ehubs_name"
+echo "  * In the Kubernetes cluster:"
+echo "    * Kubernetes service sysdig-agent"
+echo "    * Kubernetes deployment aks-audit-log-forwarder in sysdig-agent namespace"
+
+echo
+
+if [ "$#" -lt 3 ] || [ "$3" != "--yes" ]; then
+    echo "Press ENTER to continue"
+    response=$(read)
+fi
+
 
 check_commands_installed
 check_cluster

@@ -17,6 +17,7 @@ hash="${hash:0:4}"
 
 # Default resource names
 storage_account=$(echo "${cluster_name}" | tr '[:upper:]' '[:lower:]')
+storage_account=$(echo $storage_account | tr -cd '[a-zA-Z0-9]')
 storage_account="${storage_account:0:20}${hash}"
 ehubs_name="${cluster_name:0:46}${hash}"
 
