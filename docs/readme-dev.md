@@ -71,7 +71,7 @@ Take into consideration that if you create the Log Analytics in the same step th
 
 ```bash
 az login
-az az aks get-credentials --resource-group $group --name $cluster_name
+az aks get-credentials --resource-group $group --name $cluster_name
 ```
 
 5. If your cluster is empty, deploy an Nginx pod to test the logs
