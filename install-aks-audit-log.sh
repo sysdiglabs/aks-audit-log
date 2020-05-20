@@ -238,7 +238,8 @@ if [ "$#" -lt 2 ]; then
     echo "Error: one or more required parameters missing."
     echo "Usage: "
     echo "  ./install-aks-audit-log-forwarder.sh YOUR_RESOURCE_GROUP YOUR_AKS_CLUSTER_NAME"
-    echo 
+    echo "or"
+    echo "  curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/install-aks-audit-log.sh | bash -s -- YOUR_RESOURCE_GROUP_NAME YOUR_AKS_CLUSTER_NAME";
     exit 1
 fi
 resource_group="$1"
@@ -250,6 +251,8 @@ hash="${hash:0:4}"
 
 # Default resource names
 storage_account=$(echo "${cluster_name}" | tr '[:upper:]' '[:lower:]')
+storage_account=$(echo | tr -d -)
+# TODO: Remove all non supported characters for storage account
 storage_account="${storage_account:0:20}${hash}"
 ehubs_name="${cluster_name:0:46}${hash}"
 
@@ -278,3 +281,5 @@ create_event_hubs
 create_diagnostic
 create_storage_account
 create_deployment
+
+echo "Installation complete."
