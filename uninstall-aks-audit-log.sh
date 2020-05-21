@@ -58,7 +58,7 @@ do
 			;;
 		-n|--sysdig_namespace)
 			if is_valid_value "${2}"; then
-				COLLECTOR="${2}"
+				sysdig_namespace="${2}"
 			else
 				echo "ERROR: no value provided for sysdig_namespace endpoint option, use -h | --help for $(basename ${0}) Usage"
 				exit 1
@@ -107,17 +107,18 @@ diagnostic_name='auditlogdiagnostic'
 # -----------------------------------------------------------------------------
 
 
-echo "Uninstall AKS audit log resources"
+echo "Uninstall AKS audit log integration resources"
 echo "Resource group: $resource_group"
 echo "AKS cluster: $cluster_name"
+echo "Sysdig agent namespace: $sysdig_namespace"
 echo
 
 echo "This script will delete resources for AKS audit log:"
 echo "  * Diagnostic setting $diagnostic_name in the cluster"
 echo "  * Storage account $storage_account and all its containers"
 echo "  * Event Hubs namespace $ehubs_name and all its hubs"
-echo "  * Kubernetes deployment aks-audit-log-forwarder"
-echo "  * Kubernetes service sysdig-agent"
+echo "  * Kubernetes deployment: aks-audit-log-forwarder"
+echo "  * Kubernetes service: sysdig-agent"
 echo
 
 if [[ "$prompt_yes" == "1" ]]; then
