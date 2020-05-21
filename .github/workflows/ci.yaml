@@ -39,4 +39,11 @@ jobs:
       - name: Test
         run: dotnet test AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
 
-      # - name: Build && upload container with SHA-1
+      - name: Build the Docker image
+        run: docker build -f ./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile ./AKSKubeAuditReceiverSolution --tag sysdiglabs/aks-audit-log-forwarder:auto
+
+      - name: Scan image
+        uses: sysdiglabs/secure-inline-scan-action@v1
+        with:
+          image-tag: "sysdiglabs/aks-audit-log-forwarder:auto"
+          sysdig-secure-token: ${{ secrets.sysdig-secure-token }}
