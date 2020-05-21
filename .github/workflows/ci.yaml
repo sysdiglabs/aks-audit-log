@@ -23,6 +23,16 @@ jobs:
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.100' # SDK Version to use.
+
+      - name: shellcheck-github-check
+        uses: reviewdog/action-shellcheck@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-check
+          level: error
+          pattern: '*.sh'
+          path: '.'
+          exclude: './test/*'
       
       - name: Install dotnet-format for linting
         run: dotnet tool install -g dotnet-format
