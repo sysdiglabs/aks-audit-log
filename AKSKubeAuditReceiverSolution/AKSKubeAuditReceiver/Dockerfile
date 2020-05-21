@@ -17,5 +17,28 @@ RUN dotnet publish "AKSKubeAuditReceiver.csproj" -c Release -o /app/publish
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+ENV USER=docker
+ENV UID=12345
+ENV GID=23456
+
+RUN addgroup \
+        -g "$GID"  \
+        "$USER" && \
+    adduser \
+        --disabled-password \
+        --gecos "" \
+        --home "$(pwd)" \
+        --ingroup "$USER" \
+        --no-create-home \
+        --uid "$UID" \
+        "$USER"
+
+RUN chown -R $USER:$USER .
+
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 CMD wget localhost:1234/metrics -q -O - > /dev/null 2>&1
+
+#Prometheus port
 EXPOSE 1234
+
 ENTRYPOINT ["dotnet", "AKSKubeAuditReceiver.dll"]
