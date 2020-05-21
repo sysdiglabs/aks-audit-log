@@ -43,10 +43,10 @@ jobs:
       - name: Dotnet lint report
         run: dotnet format --folder AKSKubeAuditReceiverSolution/ --dry-run
 
-      - name: Build
+      - name: Dotnet build
         run: dotnet build AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
 
-      - name: Test
+      - name: Dotnet test
         run: dotnet test AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
 
       - name: Sysdig CIS Dockerfile Benchmark
@@ -80,7 +80,7 @@ jobs:
       - name: Build the Docker image
         run: docker build -f ./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile ./AKSKubeAuditReceiverSolution --tag sysdiglabs/aks-audit-log-forwarder:auto
 
-      - name: Scan image
+      - name: Sysdig Secure inline image scan
         uses: sysdiglabs/scan-action@v2
         with:
           image-tag: "sysdiglabs/aks-audit-log-forwarder:auto"
