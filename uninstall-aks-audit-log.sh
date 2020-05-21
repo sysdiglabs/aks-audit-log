@@ -145,10 +145,13 @@ az aks get-credentials \
     > tempkubeconfig
 
 echo "Deleting deployment: aks-audit-log-forwarder"
+echo kubectl delete deployment aks-audit-log-forwarder -n $sysdig_namespace
 kubectl delete deployment aks-audit-log-forwarder -n $sysdig_namespace
 
 echo "Deleting service: sysdig-agent"
+echo kubectl delete service sysdig-agent -n $sysdig_namespace
 kubectl delete service sysdig-agent -n $sysdig_namespace
+
 
 echo
 echo "Delete commands sent, it may take some minutes to complete."
