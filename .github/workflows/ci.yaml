@@ -24,7 +24,7 @@ jobs:
         with:
           dotnet-version: '3.1.100' # SDK Version to use.
 
-      - name: shellcheck-github-check
+      - name: Bash shell lint report
         uses: reviewdog/action-shellcheck@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -40,7 +40,7 @@ jobs:
       - name: Linter problem catcher
         uses: xt0rted/dotnet-format-problem-matcher@v1
 
-      - name: Lint
+      - name: Dotnet lint report
         run: dotnet format --folder AKSKubeAuditReceiverSolution/ --dry-run
 
       - name: Build
