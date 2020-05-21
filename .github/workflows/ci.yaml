@@ -46,4 +46,4 @@ jobs:
         uses: sysdiglabs/secure-inline-scan-action@v1
         with:
           image-tag: "sysdiglabs/aks-audit-log-forwarder:auto"
-          sysdig-secure-token: ${{ secrets.sysdig-secure-token }}
+          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
