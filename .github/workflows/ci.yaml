@@ -16,15 +16,15 @@ jobs:
     runs-on: ubuntu-16.04
     steps:
       
-      - name: Checkout
+      - name: Checkout repo
         uses: actions/checkout@v2
       
-      - name: Create environment
+      - name: Create Dotnet environment
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.100' # SDK Version to use.
 
-      - name: Bash shell lint report
+      - name: Bash shell lint check with shellcheck
         uses: reviewdog/action-shellcheck@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
@@ -34,22 +34,22 @@ jobs:
           path: '.'
           exclude: './test/*'
       
-      - name: Install dotnet-format for linting
+      - name: Dotnet lint install dotnet-format for linting
         run: dotnet tool install -g dotnet-format
 
-      - name: Linter problem catcher
+      - name: Dotnet lint install report generator
         uses: xt0rted/dotnet-format-problem-matcher@v1
 
-      - name: Dotnet lint report
+      - name: Dotnet lint check with dotnet-format
         run: dotnet format --folder AKSKubeAuditReceiverSolution/ --dry-run
 
-      - name: Dotnet build
+      - name: Dotnet build solution
         run: dotnet build AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
 
-      - name: Dotnet test
+      - name: Dotnet test solution
         run: dotnet test AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
 
-      - name: Sysdig CIS Dockerfile Benchmark
+      - name: Sysdig CIS dockerfile benchmark
         uses: sysdiglabs/benchmark-dockerfile@v1.0.0
         id: cis_dockerfile_benchmark
         with:
@@ -57,7 +57,7 @@ jobs:
           secretPatterns: 'aws_secret,pass'
         
 
-      - name: Post Sysdig CIS Dockerfile Benchmark
+      - name: Post Sysdig CIS dockerfile benchmark
         env:
           SYSDIG_SECURE_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
