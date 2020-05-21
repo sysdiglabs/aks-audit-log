@@ -49,7 +49,7 @@ jobs:
 
       - name: Post Sysdig CIS Dockerfile Benchmark
         env:
-          SYSDIG_SECURE_TOKEN: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          SYSDIG_SECURE_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_SHA: ${{ github.event.pull_request.head.sha }}
           PR_OWNER: ${{ github.event.pull_request.head.user.login }}
@@ -74,4 +74,4 @@ jobs:
         uses: sysdiglabs/scan-action@v2
         with:
           image-tag: "sysdiglabs/aks-audit-log-forwarder:auto"
-          sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
+          sysdig-secure-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
