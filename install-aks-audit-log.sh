@@ -48,7 +48,7 @@ function check_cluster {
     az aks get-credentials \
         --name "$cluster_name" \
         --resource-group "$resource_group" --file - \
-        > $WORKDIR/tempkubeconfig
+        > "$WORKDIR/tempkubeconfig"
 
     echo -n "."
     exists=$(KUBECONFIG=$WORKDIR/tempkubeconfig kubectl get namespaces -o name | grep -w "namespace/$sysdig_namespace" || true)
@@ -116,7 +116,7 @@ function check_az_resources {
     fi
 
     echo -n "."
-    exists=$(az storage account show --name "$storage_account" --query name -o tsv || true)
+    exists=$(az storage account show --name "$storage_account" --query name -o tsv 2>/dev/null || true)
     if [ "$exists" != "" ]; then
         echo
         echo "Can't install, resource already exists: Storage Account '$storage_account'"
@@ -135,7 +135,7 @@ function check_az_resources {
 }
 
 function get_region {
-    region=$(az aks show -n $cluster_name -g $resource_group --output tsv --query location)
+    region=$(az aks show -n "$cluster_name" -g "$resource_group" --output tsv --query location)
     echo "AKS region: $region"
 }
 
@@ -204,7 +204,7 @@ function create_storage_account {
     echo "[9/12] Creating blob container: $blob_container"
     az storage container create \
         --name "$blob_container" \
-        --connection-string $blob_connection_string \
+        --connection-string "$blob_connection_string" \
         --output none
 }
 
@@ -216,7 +216,7 @@ function create_deployment {
     export BlobStorageConnectionString="$blob_connection_string"
 
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
-      envsubst > $WORKDIR/deployment.yaml
+      envsubst > "$WORKDIR/deployment.yaml"
 
     
 
@@ -229,10 +229,10 @@ function create_deployment {
     echo "[12/12] Applying Kubernetes deployment"
     
     export KUBECONFIG="$WORKDIR/tempkubeconfig"
-    KUBECONFIG="$WORKDIR/tempkubeconfig" kubectl apply -f $WORKDIR/deployment.yaml -n "$sysdig_namespace"
+    KUBECONFIG="$WORKDIR/tempkubeconfig" kubectl apply -f "$WORKDIR/deployment.yaml" -n "$sysdig_namespace"
 
-    rm $WORKDIR/tempkubeconfig
-    rm $WORKDIR/deployment.yaml
+    rm "$WORKDIR/tempkubeconfig"
+    rm "$WORKDIR/deployment.yaml"
 }
 
 # ==========================================================================================================
@@ -253,7 +253,7 @@ function help {
     # echo "  curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/install-aks-audit-log.sh | bash -s -- YOUR_RESOURCE_GROUP_NAME YOUR_AKS_CLUSTER_NAME";
     # exit 1
 
-	echo "Usage: $(basename ${0}) [-g|--resource_group <value>] [-c|--cluster_name <value>] [-n|--sysdig_namespace] \ "
+	echo "Usage: $(basename "${0}") [-g|--resource_group <value>] [-c|--cluster_name <value>] [-n|--sysdig_namespace] \ "
 	echo "                [-y|--yes] [-h | --help]"
 	echo ""
 	echo " -g  : Azure resource group where the AKS cluster is located (required)"
@@ -276,7 +276,7 @@ cluster_name=""
 sysdig_namespace="sysdig-agent"
 
 # Get and validate all arguments
-while [[ ${#} > 0 ]]
+while [[ ${#} -gt 0 ]]
 do
 	key="${1}"
 
@@ -285,7 +285,7 @@ do
 			if is_valid_value "${2}"; then
 				resource_group="${2}"
 			else
-				echo "ERROR: no value provided for resource_group option, use -h | --help for $(basename ${0}) Usage"
+				echo "ERROR: no value provided for resource_group option, use -h | --help for $(basename "${0}") Usage"
 				exit 1
 			fi
 			shift
@@ -294,7 +294,7 @@ do
 			if is_valid_value "${2}"; then
 				cluster_name="${2}"
 			else
-				echo "ERROR: no value provided for is_valid_value option, use -h | --help for $(basename ${0}) Usage"
+				echo "ERROR: no value provided for is_valid_value option, use -h | --help for $(basename "${0}") Usage"
 				exit 1
 			fi
 			shift
@@ -303,7 +303,7 @@ do
 			if is_valid_value "${2}"; then
 				sysdig_namespace="${2}"
 			else
-				echo "ERROR: no value provided for sysdig_namespace endpoint option, use -h | --help for $(basename ${0}) Usage"
+				echo "ERROR: no value provided for sysdig_namespace endpoint option, use -h | --help for $(basename "${0}") Usage"
 				exit 1
 			fi
 			shift
@@ -316,7 +316,7 @@ do
 			exit 1
 			;;
 		*)
-			echo "ERROR: Invalid option: ${1}, use -h | --help for $(basename ${0}) Usage"
+			echo "ERROR: Invalid option: ${1}, use -h | --help for $(basename "${0}") Usage"
 			exit 1
 			;;
 	esac
@@ -324,7 +324,7 @@ do
 done
 
 
-if [ -z "$resource_group" ] || [ -z $cluster_name ]; then
+if [ -z "$resource_group" ] || [ -z "$cluster_name" ]; then
     echo "Error: one or more required parameters missing."
     echo
     help
@@ -338,7 +338,7 @@ hash="${hash:0:4}"
 
 ## Default resource names
 storage_account=$(echo "${cluster_name}" | tr '[:upper:]' '[:lower:]')
-storage_account=$(echo $storage_account | tr -cd '[a-zA-Z0-9]')
+storage_account=$(echo "$storage_account" | tr -cd 'a-zA-Z0-9')
 storage_account="${storage_account:0:20}${hash}"
 ehubs_name="${cluster_name:0:46}${hash}"
 
@@ -355,7 +355,9 @@ hub_id=''
 ## Work dir
 WORKDIR=$(mktemp -d /tmp/sysdig-aks-audit-log.XXXXXX)
 
-echo "This script will install resources to forward AKS audit log to Sysdig Secure"
+echo "AKS audit log integration with Sysdig agent"
+echo
+echo "This script will create and set up resources to forward AKS audit log to Sysdig Secure"
 echo
 echo "Destination:"
 echo "  * Resource group: $resource_group"
@@ -374,8 +376,8 @@ echo "Using temp directory: $WORKDIR"
 echo
 
 if [ "$prompt_yes" != "0" ]; then
-    echo "Press ENTER to continue"
-    response=$(read)
+    read -n 1 -s -r -p "Press ENTER to continue"
+    echo
 fi
 
 
