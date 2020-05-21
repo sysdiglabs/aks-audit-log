@@ -43,7 +43,7 @@ jobs:
         run: docker build -f ./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile ./AKSKubeAuditReceiverSolution --tag sysdiglabs/aks-audit-log-forwarder:auto
 
       - name: Scan image
-        uses: sysdiglabs/secure-inline-scan-action@v1
+        uses: sysdiglabs/scan-action@v2
         with:
           image-tag: "sysdiglabs/aks-audit-log-forwarder:auto"
           sysdig-secure-token: ${{ secrets.SYSDIG_SECURE_TOKEN }}
