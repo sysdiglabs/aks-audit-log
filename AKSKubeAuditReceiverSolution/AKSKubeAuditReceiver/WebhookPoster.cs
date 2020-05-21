@@ -33,31 +33,30 @@ namespace AKSKubeAuditReceiver
 
                 ForwarderStatistics.IncreaseSent();
                 var response = await HttpClient.PostAsync(ForwarderConfiguration.WebSinkURL, content);
-                
-                {
-                    //TODO: Info user that requesting result log makes the POST run sync, which will be slower
                     
-                    if ( response.IsSuccessStatusCode == true )
-                    {
-                        ForwarderStatistics.IncreaseSuccesses();
-                        if (ForwarderConfiguration.VerboseLevel > 3)
-                            Console.WriteLine("{0} {1} > Post response OK", mainEventName, eventNumber);
-                    }
-                    else
-                    {
-                        ForwarderStatistics.IncreaseErrors();
-                        Console.WriteLine("{0} {1} > **Error post response: {2}", mainEventName, eventNumber, response.Content.ToString());
-                    }
+                if ( response.IsSuccessStatusCode == true )
+                {
+                    ForwarderStatistics.IncreaseSuccesses();
+                    if (ForwarderConfiguration.VerboseLevel > 3)
+                        Console.WriteLine("{0} {1} > Post response OK", mainEventName, eventNumber);
+                    return false;
                 }
+                else
+                {
+                    ForwarderStatistics.IncreaseErrors();
+                    Console.WriteLine("{0} {1} > **Error post response: {2}", mainEventName, eventNumber, response.Content.ToString());
+                    return false;
+                }
+                
             }
             catch (Exception e)
             {
+                ForwarderStatistics.IncreaseErrors();
                 Console.WriteLine("{0} {1} > **Error sending post: {2}",
                     mainEventName, eventNumber, e.Message);
                 return false;
             }
 
-            return true;
         }
     }
 }
