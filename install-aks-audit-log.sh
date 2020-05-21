@@ -48,17 +48,17 @@ function check_cluster {
     az aks get-credentials \
         --name "$cluster_name" \
         --resource-group "$resource_group" --file - \
-        > tempkubeconfig
+        > $WORKDIR/tempkubeconfig
 
     echo -n "."
-    exists=$(KUBECONFIG=tempkubeconfig kubectl get namespaces -o name | grep -w "namespace/$sysdig_namespace" || true)
+    exists=$(KUBECONFIG=$WORKDIR/tempkubeconfig kubectl get namespaces -o name | grep -w "namespace/$sysdig_namespace" || true)
     if [ "$exists" == "" ]; then
         echo "Couldn't find $sysdig_namespace namespace in the cluster."
         exit 1
     fi;
 
     echo -n "."
-    exists=$(KUBECONFIG=tempkubeconfig kubectl get deployments -o name | grep -w "deployment.extensions/aks-audit-log-forwarder"  || true)
+    exists=$(KUBECONFIG=$WORKDIR/tempkubeconfig kubectl get deployments -o name | grep -w "deployment.extensions/aks-audit-log-forwarder"  || true)
     if [ "$exists" != "" ]; then
         echo "Audit log forwarder deployment already present in the cluster."
         exit 1
@@ -216,23 +216,23 @@ function create_deployment {
     export BlobStorageConnectionString="$blob_connection_string"
 
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
-      envsubst > deployment.yaml
+      envsubst > $WORKDIR/deployment.yaml
 
     
 
     echo "[11/12] Applying Kubernetes service"
 
-    KUBECONFIG="tempkubeconfig" kubectl apply \
+    KUBECONFIG="$WORKDIR/tempkubeconfig" kubectl apply \
         -f https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/service.yaml \
         -n "$sysdig_namespace"
 
     echo "[12/12] Applying Kubernetes deployment"
     
-    export KUBECONFIG="tempkubeconfig"
-    KUBECONFIG="tempkubeconfig" kubectl apply -f deployment.yaml -n "$sysdig_namespace"
+    export KUBECONFIG="$WORKDIR/tempkubeconfig"
+    KUBECONFIG="$WORKDIR/tempkubeconfig" kubectl apply -f $WORKDIR/deployment.yaml -n "$sysdig_namespace"
 
-    rm tempkubeconfig
-    rm deployment.yaml
+    rm $WORKDIR/tempkubeconfig
+    rm $WORKDIR/deployment.yaml
 }
 
 # ==========================================================================================================
@@ -301,7 +301,7 @@ do
 			;;
 		-n|--sysdig_namespace)
 			if is_valid_value "${2}"; then
-				COLLECTOR="${2}"
+				sysdig_namespace="${2}"
 			else
 				echo "ERROR: no value provided for sysdig_namespace endpoint option, use -h | --help for $(basename ${0}) Usage"
 				exit 1
@@ -352,6 +352,8 @@ blob_connection_string=''
 hub_connection_string=''
 hub_id=''
 
+## Work dir
+WORKDIR=$(mktemp -d /tmp/sysdig-aks-audit-log.XXXXXX)
 
 echo "This script will install resources to forward AKS audit log to Sysdig Secure"
 echo
@@ -365,10 +367,10 @@ echo "  * Storage account: $storage_account"
 echo "    * Blob container: $blob_container"
 echo "  * Event Hubs namespace: $ehubs_name"
 echo "    * Hub namespace: $ehubs_name"
-echo "  * In the Kubernetes cluster:"
-echo "    * Kubernetes service sysdig-agent"
-echo "    * Kubernetes deployment aks-audit-log-forwarder in sysdig-agent namespace"
-
+echo "  * In the Kubernetes cluster's namespace: $sysdig_namespace"
+echo "    * Kubernetes service: sysdig-agent"
+echo "    * Kubernetes deployment: aks-audit-log-forwarder"
+echo "Using temp directory: $WORKDIR"
 echo
 
 if [ "$prompt_yes" != "0" ]; then
