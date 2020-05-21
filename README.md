@@ -13,7 +13,8 @@ The installation script has some command line tool requirements:
   * curl, tr, grep
 
 ```bash
-curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/install-aks-audit-log.sh | bash -s -- YOUR_RESOURCE_GROUP_NAME YOUR_AKS_CLUSTER_NAME
+curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/install-aks-audit-log.sh | \
+  bash -s -- -g YOUR_RESOURCE_GROUP_NAME -c YOUR_AKS_CLUSTER_NAME
 ```
 
 Some resources will be created in the same resource group as your cluster:
@@ -25,5 +26,10 @@ Some resources will be created in the same resource group as your cluster:
 ## Uninstallation
 
 ```bash
-curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/uninstall-aks-audit-log.sh | bash -s -- YOUR_RESOURCE_GROUP_NAME YOUR_AKS_CLUSTER_NAME
+curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/uninstall-aks-audit-log.sh | \
+  bash -s -- -g YOUR_RESOURCE_GROUP_NAME -c YOUR_AKS_CLUSTER_NAME
 ```
+
+## More information
+
+Check the [developer documentation](./docs/readme-dev.md) for architecture and manual installation details.
