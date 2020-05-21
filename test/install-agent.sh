@@ -7,5 +7,6 @@ echo "Installing Sysdig agent"
 curl -s https://download.sysdig.com/stable/install-agent-kubernetes | \
   bash -s -- --access_key $SYSDIG_AGENT_ACCESS_KEY \
     --collector collector.sysdigcloud.com --collector_port 6443 \
-    --cluster_name $my_cluster_name --imageanalyzer
+    --cluster_name $my_cluster_name --imageanalyzer \
+    -ns my-sysdig-agent
 
