@@ -16,7 +16,7 @@ spec:
         app: aks-audit-log-forwarder
     spec:
       containers:
-      - image: sysdiglabs/aks-audit-log-forwarder:0.1.1
+      - image: sysdiglabs/aks-audit-log-forwarder:0.1.2
         name: aks-audit-log-forwarder
         env:
         - name: EhubNamespaceConnectionString
