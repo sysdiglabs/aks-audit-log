@@ -2,16 +2,16 @@
 
 set -euo pipefail
 
-script_dir=$(dirname "$(realpath $0)")
+script_dir=$(dirname "$(realpath "$0")")
 
 #echo "1/4 BUILDING"
-dotnet build ${script_dir}/AKSKubeAuditReceiver.sln
+dotnet build "${script_dir}"/AKSKubeAuditReceiver.sln
 echo "---------------------------------"
 echo "2/4 TESTING"
-dotnet test ${script_dir}/AKSKubeAuditReceiver.sln
+dotnet test "${script_dir}"/AKSKubeAuditReceiver.sln
 echo "---------------------------------"
 echo "3/4 DOCKER BUILDING"
-docker build -f ${script_dir}/AKSKubeAuditReceiver/Dockerfile ${script_dir} \
+docker build -f "${script_dir}"/AKSKubeAuditReceiver/Dockerfile "${script_dir}" \
         -t aks-audit-log-forwarder \
         -t aks-audit-log-forwarder:dev \
         -t sysdiglabs/aks-audit-log-forwarder \
