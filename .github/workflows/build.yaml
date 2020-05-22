@@ -31,6 +31,15 @@ jobs:
           path: '.'
           exclude: './test/*'
 
+      - name: 'Yaml lint'
+        uses: karancode/yamllint-github-action@master
+        with:
+          yamllint_file_or_dir: './*.yaml*'
+          yamllint_strict: false
+          yamllint_comment: true
+        env:
+          GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
       - name: Create Dotnet environment
         uses: actions/setup-dotnet@v1
         with:
