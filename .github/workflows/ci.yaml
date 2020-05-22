@@ -14,15 +14,12 @@ on:
 jobs:
   check:
     runs-on: ubuntu-16.04
+    env:
+      NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
     steps:
       
       - name: Checkout repo
         uses: actions/checkout@v2
-      
-      - name: Create Dotnet environment
-        uses: actions/setup-dotnet@v1
-        with:
-          dotnet-version: '3.1.100' # SDK Version to use.
 
       - name: Bash shell lint check with shellcheck
         uses: reviewdog/action-shellcheck@v1
@@ -33,7 +30,20 @@ jobs:
           pattern: '*.sh'
           path: '.'
           exclude: './test/*'
-      
+
+      - name: Create Dotnet environment
+        uses: actions/setup-dotnet@v1
+        with:
+          dotnet-version: '3.1.100' # SDK Version to use.
+
+      - name: Restore cached nuget packages
+        uses: actions/cache@v1
+        with:
+          path: ${{ github.workspace }}/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
       - name: Dotnet lint install dotnet-format for linting
         run: dotnet tool install -g dotnet-format
 
