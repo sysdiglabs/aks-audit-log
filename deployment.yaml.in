@@ -14,10 +14,33 @@ spec:
     metadata:
       labels:
         app: aks-audit-log-forwarder
+  
     spec:
       containers:
       - image: sysdiglabs/aks-audit-log-forwarder:0.1.2
         name: aks-audit-log-forwarder
+        resources:
+          # Resources needed are subjective to the actual workload.
+          # Please refer to Sysdig Support for more info.
+          requests:
+            cpu: 20m
+            memory: 512Mi
+          limits:
+            cpu: 200m
+            memory: 1024Mi
+        readinessProbe:
+          exec:
+            command:
+            - wget  
+            - localhost:1234/metrics
+            - --spider
+          initialDelaySeconds: 10
+        livenessProbe:
+          httpGet:
+            path: /metrics
+            port: 1234
+          initialDelaySeconds: 10
+          periodSeconds: 20
         env:
         - name: EhubNamespaceConnectionString
           value: "$EhubNamespaceConnectionString"
