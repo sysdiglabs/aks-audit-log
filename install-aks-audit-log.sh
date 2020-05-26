@@ -149,6 +149,7 @@ function create_event_hubs {
         --resource-group "$resource_group" \
         --location "$region" --output none
 
+    # Message retention 1 day
     echo "[3/12] Creating Event Hub: $hub_name"
     az eventhubs eventhub create --name "$hub_name" \
         --namespace-name "$ehubs_name" \
@@ -214,6 +215,9 @@ function create_deployment {
 
     export EhubNamespaceConnectionString="$hub_connection_string"
     export BlobStorageConnectionString="$blob_connection_string"
+    export VerboseLevel="3"
+    export ImagePullPolicy="IfNotPresent"
+    export ImageVersion="0.1.2"
 
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
       envsubst > "$WORKDIR/deployment.yaml"

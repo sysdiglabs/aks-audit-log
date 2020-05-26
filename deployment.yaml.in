@@ -17,7 +17,8 @@ spec:
         app: aks-audit-log-forwarder
     spec:
       containers:
-        - image: sysdiglabs/aks-audit-log-forwarder:0.1.2
+        - image: sysdiglabs/aks-audit-log-forwarder:$ImageVersion
+          imagePullPolicy: $ImagePullPolicy
           name: aks-audit-log-forwarder
           resources:
             # Resources needed are subjective to the actual workload.
@@ -53,4 +54,4 @@ spec:
             - name: WebSinkURL
               value: "http://sysdig-agent:7765/k8s_audit"
             - name: VerboseLevel
-              value: "3"
+              value: "$VerboseLevel"
