@@ -127,32 +127,33 @@ if [[ "$prompt_yes" == "1" ]]; then
 	echo
 fi
 
-echo "Deleting diagnostic settings: $diagnostic_name"
+echo "[1/5] Deleting diagnostic settings: $diagnostic_name"
 az monitor diagnostic-settings delete \
  --resource "$cluster_name" \
  --resource-group "$resource_group" \
  --resource-type "Microsoft.ContainerService/ManagedClusters" \
  --name "$diagnostic_name" --output none
 
-echo "Deleting storage account: $storage_account"
+
+echo "[2/5] Deleting deployment: aks-audit-log-forwarder"
+echo kubectl delete deployment aks-audit-log-forwarder -n "$sysdig_namespace"
+kubectl delete deployment aks-audit-log-forwarder -n "$sysdig_namespace"
+
+
+echo "[3/5] Deleting storage account: $storage_account"
 az storage account delete --name "$storage_account" --yes --output none
 
-echo "Deleting event hubs namespace: $ehubs_name"
+echo "[4/5] Deleting service: sysdig-agent"
+echo kubectl delete service sysdig-agent -n "$sysdig_namespace"
+kubectl delete service sysdig-agent -n "$sysdig_namespace"
+
+echo "[5/5] Deleting event hubs namespace: $ehubs_name"
 az eventhubs namespace delete --resource-group "$resource_group" --name "$ehubs_name" --output none
 
 az aks get-credentials \
     --name "$cluster_name" \
     --resource-group "$resource_group" --file - \
     > tempkubeconfig
-
-echo "Deleting deployment: aks-audit-log-forwarder"
-echo kubectl delete deployment aks-audit-log-forwarder -n "$sysdig_namespace"
-kubectl delete deployment aks-audit-log-forwarder -n "$sysdig_namespace"
-
-echo "Deleting service: sysdig-agent"
-echo kubectl delete service sysdig-agent -n "$sysdig_namespace"
-kubectl delete service sysdig-agent -n "$sysdig_namespace"
-
 
 echo
 echo "Delete commands sent, it may take some minutes to complete."
