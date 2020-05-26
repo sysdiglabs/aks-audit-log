@@ -6,7 +6,7 @@ namespace NetCore.Docker
 {
     class Program
     {
-        private static readonly string Version = "0.1.2";
+        private static readonly string Version = "0.1.3";
 
         static async Task Main(string[] args)
         {

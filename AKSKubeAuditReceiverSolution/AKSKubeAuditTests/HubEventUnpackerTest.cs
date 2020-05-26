@@ -70,6 +70,27 @@ namespace AKSKubeAuditTests
         }
 
         [Fact]
+        public async void TestProcessTwoEvents()
+        {
+            var hubEventUnpacker = new HubEventUnpacker(Configuration);
+            var fakeWebhookPoster = GetFakeWebhookPoster_returnsTrue();
+            hubEventUnpacker.WebhookPoster = fakeWebhookPoster.Object;
+            var kubeEvents = new List<string>
+            {
+                SampleKubeEvent,
+                SampleKubeEvent
+            };
+
+            JObject jsonHubEvent = GetSampleJsonHubEvent(kubeEvents);
+
+            await hubEventUnpacker.Process(jsonHubEvent);
+
+            fakeWebhookPoster.Verify(
+                mock => mock.SendPost(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()),
+                Times.Exactly(2));
+        }
+
+        [Fact]
         public async void TestProcessThreeEvents()
         {
             var hubEventUnpacker = new HubEventUnpacker(Configuration);
@@ -89,7 +110,6 @@ namespace AKSKubeAuditTests
             fakeWebhookPoster.Verify(
                 mock => mock.SendPost(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>()),
                 Times.Exactly(3));
-
         }
     }
 }

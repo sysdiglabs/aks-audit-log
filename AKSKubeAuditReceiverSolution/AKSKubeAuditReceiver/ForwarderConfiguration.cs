@@ -14,6 +14,9 @@ namespace AKSKubeAuditReceiver
 
         public int VerboseLevel = 4;
 
+        public int PostMaxRetries = 10;
+        public int PostRetryIncrementalDelay = 1000;
+
         public void InitConfig()
         {
             EhubNamespaceConnectionString = Environment.GetEnvironmentVariable("EhubNamespaceConnectionString");

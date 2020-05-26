@@ -1,4 +1,4 @@
-using Prometheus;
+﻿using Prometheus;
 
 namespace AKSKubeAuditReceiver
 {
@@ -13,6 +13,9 @@ namespace AKSKubeAuditReceiver
 
         private static readonly Counter Successes =
             Metrics.CreateCounter("sysdig_aks_audit_log_kube_events_success", "Total number of kube events sent with success result");
+
+        private static readonly Counter Retries =
+            Metrics.CreateCounter("sysdig_aks_audit_log_kube_events_retry", "Total number of times kube events sent had to be retried");
 
         private static MetricServer Server;
         //private static KestrelMetricServer Server;
@@ -37,6 +40,9 @@ namespace AKSKubeAuditReceiver
         {
             Sent.Inc();
         }
-
+        public static void IncreaseRetries()
+        {
+            Sent.Inc();
+        }
     }
 }

@@ -7,6 +7,15 @@
     <DockerComposeProjectPath>../docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
+  <PropertyGroup Condition=" '$(RunConfiguration)' == 'Default' ">
+    <StartAction>Project</StartAction>
+    <ExternalConsole>true</ExternalConsole>
+    <EnvironmentVariables>
+      <Variable name="EhubNamespaceConnectionString" value="Endpoint=sb://aksauditlogtest-cluster4009.servicebus.windows.net/;SharedAccessKeyName=RootManageSharedAccessKey;SharedAccessKey=riJgozaFDMS4WCDPeL15GCQad2XvZ8qqfS0ABqo8nok=" />
+      <Variable name="BlobStorageConnectionString" value="DefaultEndpointsProtocol=https;EndpointSuffix=core.windows.net;AccountName=aksauditlogtestclust9914;AccountKey=Ml9fICjqs6tyN/2U8mlH/ANC2HkiVRSVrWhHbioqujRfpU1WhtFZcfyNOCP5/iLR7Jvk+dQq/zkUE2XmngP1uQ==" />
+      <Variable name="WebSinkURL" value="" />
+    </EnvironmentVariables>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Azure.Messaging.EventHubs" Version="5.1.0" />
     <PackageReference Include="Azure.Messaging.EventHubs.Processor" Version="5.1.0" />
