@@ -83,11 +83,12 @@ jobs:
         uses: sysdiglabs/benchmark-dockerfile@v1.0.0
         id: cis_dockerfile_benchmark
         with:
+          directory: './AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/'
+          dockerfilePattern: 'Dockerfile'
           disallowedPackages: 'netcat'
           secretPatterns: 'aws_secret,pass'
         
-
-      - name: Post Sysdig CIS dockerfile benchmark
+      - name: Post run Sysdig CIS dockerfile benchmark
         env:
           SYSDIG_SECURE_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
           PR_TITLE: ${{ github.event.pull_request.title }}
@@ -104,8 +105,6 @@ jobs:
           curl -X POST -s https://app.sysdigcloud.com/api/events -H 'Content-Type: application/json; charset=UTF-8' -H 'Authorization: Bearer '"${SYSDIG_SECURE_TOKEN}"'' -d '{"event":{"name":"CIS Dockerfile Benchmark - PR: '"${PR_TITLE}"' ","description":"'"${reportString}"'","severity":"6"}}' --compressed
           echo "###"
           
-          # echo "Stop here!"
-          # exit 1
 
       - name: Build the Docker image
         run: docker build -f ./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile ./AKSKubeAuditReceiverSolution --tag sysdiglabs/aks-audit-log-forwarder:auto
