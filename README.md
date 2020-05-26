@@ -1,8 +1,8 @@
 # Azure Kubernetes Service audit log integration to Sysdig Secure
 
-This repository contains an installation/uninstallation script, instructions and source code to integrate Azure Kubernetes Service audit log to Sysdig Secure.
+This repository contains an installation/uninstallation script, instructions and source code to integrate Azure Kubernetes Service audit log to [Sysdig Secure](https://sysdig.com).
 
-[![Actions Status](https://github.com/sysdiglabs/aks-audit-log/workflows/CI/badge.svg)](https://github.com/sysdiglabs/aks-audit-log/actions)
+[![Actions Status](https://github.com/sysdiglabs/aks-audit-log/workflows/build/badge.svg)](https://github.com/sysdiglabs/aks-audit-log/actions)
 
 ## Installation
 
