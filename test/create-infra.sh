@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -euf
+# set -uf
 
 echo "Create infra"
 echo "Resource group: $my_resource_group"
@@ -9,22 +9,28 @@ echo
 echo "Press ENTER to continue"
 read 
 
-
 echo "Creating resource group"
-az group create --location eastus --name $my_resource_group -o none
-echo "Waiting so service principal creation can success"
-sleep 15
-
-echo "Creating AKS cluster"
-az aks create --name "$my_cluster_name" -g "$my_resource_group" --node-count 3
-
-echo "Waiting to finalize creation"
-state=$(az aks show --resource-group $my_resource_group --name $my_cluster_name  --query provisioningState -o tsv )
-while [[ "$state" != "Succeeded" ]]; do
-    echo -n "."
-    state=$(az aks show --resource-group $my_resource_group --name $my_cluster_name  --query provisioningState -o tsv )
-    echo $state
-    sleep 10
-done
+az group create --location eastus --name "$my_resource_group" 
+#-o none
 echo
-echo $state
+
+
+echo "Creating AKS cluster, due to a Azure bug, will retry at most 6 times"
+# https://github.com/Azure/AKS/issues/1206
+
+result=1
+i=6
+while [ $result -eq 1 ] && [ $i -gt 0 ]; do 
+    az aks create --name "$my_cluster_name" -g "$my_resource_group" --node-count 3
+    result=$?
+    #az aks show --resource-group "$my_resource_group" --name "$my_cluster_name" --query provisioningState -o tsv
+    #result=$?
+    i=$((i-1))
+    sleep 2
+    #echo -n "."
+done
+
+az aks show --resource-group "$my_resource_group" --name "$my_cluster_name"  --query provisioningState -o tsv
+echo
+
+

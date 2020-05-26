@@ -10,6 +10,9 @@ echo
 read -n 1 -s -r -p "Press ENTER to continue"
 echo
 echo
+
+echo "Destroying resource group $my_resource_group and all its resources"
+
 #az aks delete --name "$my_cluster_name" -g "$my_resource_group" --yes
 
 az group delete --name "$my_resource_group" --yes
@@ -23,6 +26,8 @@ az group delete --name "$my_resource_group" --yes
 #     echo -n "."
 # done
 # echo $state
+
+say "Infrastructure destroyed"
 
 
 
