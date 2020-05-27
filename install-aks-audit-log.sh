@@ -217,7 +217,7 @@ function create_deployment {
     export BlobStorageConnectionString="$blob_connection_string"
     export VerboseLevel="3"
     export ImagePullPolicy="IfNotPresent"
-    export ImageVersion="0.1.2"
+    export ImageVersion="0.1.3"
 
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
       envsubst > "$WORKDIR/deployment.yaml"
