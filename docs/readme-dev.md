@@ -17,7 +17,7 @@ In vanilla Kubernetes installations, you can tell the Kubernetes API server to s
 
 ## Implementation
 
-The [AKSKubeAuditReceiverSolution](../AKSKubeAuditReceiverSolution) has been implemented using .NET core 3.1. And is packaged in a container image that you deploy in the AKS cluster.
+The [AKSKubeAuditReceiverSolution](../AKSKubeAuditReceiverSolution) has been implemented using .NET core 3.1 because its Event Hubs client library doesn't require to previously create a service principal to interact with a hub, so it is easier to deploy. It is packaged in a container image that you deploy in the AKS cluster.
 
 We evaluated to use a go Event Hubs client library, but it required to create a specific Service Account for it, which is something that can be problematic in environments where the user doesn't have owner access to the whole Azure account.
 
@@ -30,7 +30,6 @@ A standard AKS cluster with 3 nodes and no workload will need less than 1 Mb/s o
 ## Dependencies
 
 Tested with AKS created with Kubernetes version 1.15.10
-
 
 ## Manual deployment
 
@@ -103,19 +102,24 @@ curl -s https://download.sysdig.com/stable/install-agent-kubernetes | bash -s --
   * Deploy service definition for Sysdig's agent webhook
 
 ```bash
-kubectl apply -f service.yaml
+kubectl apply -f service.yaml -n sysdig-agent
 ```
 
 
 8. Deploy the AKS Audit Log consumer-forwarder
 
-  * Execute:
+  * Changing image version, pull policy and connection strings, execute:
 
 ```bash
 # Replace YOUR_EVENT_HUB_CONNECTION_STRING and YOUR_BLOB_STORAGE_CONNECTION_STRING
 EhubNamespaceConnectionString="YOUR_EVENT_HUB_CONNECTION_STRING" \
   BlobStorageConnectionString="YOUR_BLOB_STORAGE_CONNECTION_STRING" \
+  VerboseLevel="3" \
+  ImagePullPolicy="Always" \
+  ImageVersion="latest" \
   envsubst < deployment.yaml.in > deployment.yaml
+
+  kubectl apply -f deployment.yaml -n sysdig-agent
 ```
 
   * Wait until it's deployed, and you can check it's logs at:
