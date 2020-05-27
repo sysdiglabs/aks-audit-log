@@ -1,27 +1,40 @@
-#/usr/local/bin/fish
+#!/bin/bash
 
 echo "Resource group: $my_resource_group"
 echo "Cluster name: $my_cluster_name"
 
-set -x resource_group $my_resource_group
-set -x cluster_name $my_cluster_name
+resource_group="$my_resource_group"
+cluster_name="$my_cluster_name"
 
-set -x hash (echo -n "$cluster_name$resource_group" | md5sum)
-set -x hash (string sub --length 4 "$hash")
-set -x storage_account (echo "$cluster_name" | tr '[:upper:]' '[:lower:]')
-set -x storage_account (echo $storage_account | tr -cd '[a-zA-Z0-9]')
-set -x storage_account (string sub --length 20 "$storage_account")
-set -x storage_account "$storage_account""$hash"
-set -x ehubs_name (string sub --length 46 "$cluster_name")
-set -x ehubs_name "$ehubs_name""$hash"
+# Calculated values
+
+## Hash from cluster name for resources
+hash=$(echo -n "${cluster_name}${resource_group}" | md5sum)
+hash="${hash:0:4}"
+
+## Default resource names
+storage_account=$(echo "${cluster_name}" | tr '[:upper:]' '[:lower:]')
+storage_account=$(echo "$storage_account" | tr -cd 'a-zA-Z0-9')
+storage_account="${storage_account:0:20}${hash}"
+ehubs_name="${cluster_name:0:46}${hash}"
+
+## Default unchanged values
+blob_container='kubeauditlogcontainer'
+hub_name='insights-logs-kube-audit'
+diagnostic_name='auditlogdiagnostic'
+
+## Output parameters needed
+blob_connection_string=''
+hub_connection_string=''
+hub_id=''
 
 echo "storage_account: $storage_account"
 echo "ehubs_name: $ehubs_name"
 echo
 
-set -Ux WebSinkURL ""
-set -Ux EhubNamespaceConnectionString ""
-set -Ux BlobStorageConnectionString ""
+export WebSinkURL=""
+export EhubNamespaceConnectionString=""
+export BlobStorageConnectionString=""
 
 # echo "Getting DNS prefix"
 
@@ -39,30 +52,35 @@ set -Ux BlobStorageConnectionString ""
 
 echo "Getting storage connection string"
 
-set -x blob_connection_string (az storage account show-connection-string --key primary \
+blob_connection_string=$(az storage account show-connection-string --key primary \
     --name "$storage_account" \
     --resource-group "$resource_group" \
     --output tsv --query connectionString)
 
-set -Ux BlobStorageConnectionString "$blob_connection_string"
+export BlobStorageConnectionString="$blob_connection_string"
 echo BlobStorageConnectionString 
 echo "$blob_connection_string"
 echo
 
 echo "Getting Event Hubs connection string"
 
-set -x hub_connection_string (az eventhubs namespace authorization-rule keys list \
+hub_connection_string=$(az eventhubs namespace authorization-rule keys list \
     --resource-group "$resource_group" \
     --namespace-name "$ehubs_name" \
     --name RootManageSharedAccessKey \
     --output tsv --query primaryConnectionString)
 
-set -Ux EhubNamespaceConnectionString "$hub_connection_string"
+export EhubNamespaceConnectionString="$hub_connection_string"
 echo EhubNamespaceConnectionString 
 echo "$hub_connection_string"
 echo
 
+
 echo "Generating custom deployment"
+
+export VerboseLevel="4"
+export ImagePullPolicy="Always"
+export ImageVersion="dev"
 
 # curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in | envsubst > my-deployment.yaml
 cat ../deployment.yaml.in | envsubst > my-deployment.yaml
