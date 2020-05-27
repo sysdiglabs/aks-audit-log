@@ -251,12 +251,6 @@ function is_valid_value {
 
 function help {
 
-    echo "Usage: "
-    # echo "  ./install-aks-audit-log-forwarder.sh YOUR_RESOURCE_GROUP YOUR_AKS_CLUSTER_NAME"
-    # echo "or"
-    # echo "  curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/install-aks-audit-log.sh | bash -s -- YOUR_RESOURCE_GROUP_NAME YOUR_AKS_CLUSTER_NAME";
-    # exit 1
-
 	echo "Usage: $(basename "${0}") [-g|--resource_group <value>] [-c|--cluster_name <value>] [-n|--sysdig_namespace] \ "
 	echo "                [-y|--yes] [-h | --help]"
 	echo ""
