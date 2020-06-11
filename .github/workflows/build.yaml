@@ -7,9 +7,9 @@ on:
     branches:
       - master
   page_build:
-    release:
-      types:
-        - created
+  release:
+    types:
+      - created
 
 jobs:
   check_installer:
