@@ -65,13 +65,13 @@ jobs:
             ${{ runner.os }}-nuget-
 
       - name: Dotnet lint install dotnet-format for linting
-        run: dotnet tool install -g dotnet-format
+        run: dotnet tool install -g dotnet-format --version 3.3.111304
 
       - name: Dotnet lint install report generator
         uses: xt0rted/dotnet-format-problem-matcher@v1
 
       - name: Dotnet lint check with dotnet-format
-        run: dotnet format AKSKubeAuditReceiverSolution/ --folder --check
+        run: dotnet format  --folder AKSKubeAuditReceiverSolution/ --check --dry-run
 
       - name: Dotnet build solution
         run: dotnet build AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
