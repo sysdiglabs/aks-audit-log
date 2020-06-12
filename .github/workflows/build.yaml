@@ -71,7 +71,7 @@ jobs:
         uses: xt0rted/dotnet-format-problem-matcher@v1
 
       - name: Dotnet lint check with dotnet-format
-        run: dotnet format --folder AKSKubeAuditReceiverSolution/ --dry-run
+        run: dotnet format AKSKubeAuditReceiverSolution/ --folder --check
 
       - name: Dotnet build solution
         run: dotnet build AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
