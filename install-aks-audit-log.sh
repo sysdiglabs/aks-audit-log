@@ -5,39 +5,44 @@ set -euf
 function check_commands_installed {
     echo "[1/12] Checking requirements"
     local exists
-    exists=$(which az)
+    exists=$(which az ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'az' not available."
         echo "For instructions on how to install it, visit:"
         ecbo "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest"
         exit 1
     fi
-    exists=$(which kubectl)
+    exists=$(which kubectl ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'kubectl' not available."
         echo "Yoy may install it using:"
         echo "  az aks install-cli"
         exit 1
     fi
-    exists=$(which envsubst)
+    exists=$(which envsubst ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'envsubts' not available."
         echo "You may find it in the gettext or gettext-base packages."
         exit 1
     fi
-    exists=$(which curl)
+    exists=$(which curl ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'curl' not available."
         exit 1
     fi
-    exists=$(which tr)
+    exists=$(which tr ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'tr' not available."
         exit 1
     fi
-    exists=$(which grep)
+    exists=$(which grep ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'grep' not available."
+        exit 1
+    fi
+    exists=$(which md5sum ||:)
+    if [ "$exists" == "" ]; then
+        echo "Required command line tool 'md5sum' not available."
         exit 1
     fi
 }
