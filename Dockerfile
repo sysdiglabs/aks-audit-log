@@ -6,6 +6,7 @@ RUN apk add gettext \
 WORKDIR /app
 
 COPY ./install-aks-audit-log.sh .
+COPY ./uninstall-aks-audit-log.sh .
 
 WORKDIR /data
 
