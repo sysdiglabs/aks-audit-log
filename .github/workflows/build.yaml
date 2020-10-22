@@ -1,4 +1,4 @@
-name: build
+name: Lint, test and security scan
 on: 
   push:
     branches:
@@ -12,7 +12,8 @@ on:
       - created
 
 jobs:
-  check_installer:
+  check_bash_installer:
+    name: Bash shell lint check
     runs-on: ubuntu-16.04
     steps:
       - name: Checkout repo
@@ -29,6 +30,7 @@ jobs:
           exclude: './test/*'
 
   check_yaml:
+    name: YAML lint check
     runs-on: ubuntu-16.04
     steps:
       - name: Checkout repo
@@ -43,7 +45,8 @@ jobs:
         env:
           GITHUB_ACCESS_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  check_main:
+  check_dotnet:
+    name: .NET lint, test and build check
     runs-on: ubuntu-16.04
     env:
       NUGET_PACKAGES: ${{ github.workspace }}/.nuget/packages
@@ -79,6 +82,13 @@ jobs:
       - name: Dotnet test solution
         run: dotnet test AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
 
+  sysdig_dockerfile_cis_benchmark:
+    name: Sysdig Dockerfile CIS benchmark
+    needs: [check_bash_installer, check_yaml, check_dotnet]
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
       - name: Sysdig CIS dockerfile benchmark
         uses: sysdiglabs/benchmark-dockerfile@v1.0.0
         id: cis_dockerfile_benchmark
@@ -86,8 +96,7 @@ jobs:
           directory: './AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/'
           dockerfilePattern: 'Dockerfile'
           disallowedPackages: 'netcat'
-          secretPatterns: 'aws_secret,pass'
-        
+          secretPatterns: 'aws_secret,pass'    
       - name: Post run Sysdig CIS dockerfile benchmark
         env:
           SYSDIG_SECURE_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
@@ -104,11 +113,16 @@ jobs:
           # send result to Sysdig monitor
           curl -X POST -s https://app.sysdigcloud.com/api/events -H 'Content-Type: application/json; charset=UTF-8' -H 'Authorization: Bearer '"${SYSDIG_SECURE_TOKEN}"'' -d '{"event":{"name":"CIS Dockerfile Benchmark - PR: '"${PR_TITLE}"' ","description":"'"${reportString}"'","severity":"6"}}' --compressed
           echo "###"
-          
 
+  sysdig_image_scan:
+    name: Sysdig image scan
+    needs: [check_bash_installer, check_yaml, check_dotnet]
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2      
       - name: Build the Docker image
         run: docker build -f ./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile ./AKSKubeAuditReceiverSolution --tag sysdiglabs/aks-audit-log-forwarder:auto
-
       - name: Sysdig Secure inline image scan
         uses: sysdiglabs/scan-action@v2
         with:
