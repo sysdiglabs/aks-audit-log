@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/azure-cli
+FROM mcr.microsoft.com/azure-cli:2.9.1
 
 RUN apk add gettext \
  && az aks install-cli
