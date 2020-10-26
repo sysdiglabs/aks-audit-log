@@ -1,7 +1,7 @@
 
 INSTALLER_IMAGE=sysdiglabs/aks-audit-log-installer
 INSTALLER_MAYOR=1
-INSTALLER_MINOR=1.0
+INSTALLER_MINOR=1.1
 
 RESOURCE_GROUP="aks-test-group"
 CLUSTER_NAME="aks-test-cluster"
@@ -30,3 +30,21 @@ uninstall:
 		--entrypoint /app/uninstall-aks-audit-log.sh \
 		sysdiglabs/aks-audit-log-installer:${MINOR} \
 		-g ${RESOURCE_GROUP} -c ${CLUSTER_NAME}
+
+check: check-shell check-yaml check-dotnet
+
+check-shell:
+	shellcheck *.sh
+
+check-yaml:
+	yamllint ./*.yaml*
+
+check-dotnet:
+	# Dotnet lint install dotnet-format for linting
+	dotnet tool install -g dotnet-format --version 3.3.111304 ||:
+    # Dotnet lint check with dotnet-format
+	dotnet format --folder AKSKubeAuditReceiverSolution/ --check --dry-run || true
+    # Dotnet build solution
+	dotnet build AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
+    # Dotnet test solution
+	dotnet test AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
