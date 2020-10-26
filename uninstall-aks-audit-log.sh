@@ -10,7 +10,7 @@ function is_valid_value {
 
 function help {
 
-	echo "Usage: $(basename "${0}") [-g|--resource_group <value>] [-c|--cluster_name <value>] [-n|--sysdig_namespace] \ "
+	echo "Usage: $(basename "${0}") [-g|--resource_group <value>] [-c|--cluster_name <value>] [-n|--sysdig_namespace] \\ "
 	echo "                [-y|--yes] [-h | --help]"
 	echo ""
 	echo " -g  : Azure resource group where the AKS cluster is located (required)"

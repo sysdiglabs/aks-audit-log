@@ -57,42 +57,42 @@ function check_commands_installed {
     step=$((step + 1))
     echo "Checking requirements"
     local exists
-    exists=$(which az ||:)
+    exists=$(command -v az ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'az' not available."
         echo "For instructions on how to install it, visit:"
         ecbo "https://docs.microsoft.com/en-us/cli/azure/install-azure-cli?view=azure-cli-latest"
         exit 1
     fi
-    exists=$(which kubectl ||:)
+    exists=$(command -v kubectl ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'kubectl' not available."
         echo "Yoy may install it using:"
         echo "  az aks install-cli"
         exit 1
     fi
-    exists=$(which envsubst ||:)
+    exists=$(command -v envsubst ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'envsubts' not available."
         echo "You may find it in the gettext or gettext-base packages."
         exit 1
     fi
-    exists=$(which curl ||:)
+    exists=$(command -v curl ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'curl' not available."
         exit 1
     fi
-    exists=$(which tr ||:)
+    exists=$(command -v tr ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'tr' not available."
         exit 1
     fi
-    exists=$(which grep ||:)
+    exists=$(command -v grep ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'grep' not available."
         exit 1
     fi
-    exists=$(which md5sum ||:)
+    exists=$(command -v md5sum ||:)
     if [ "$exists" == "" ]; then
         echo "Required command line tool 'md5sum' not available."
         exit 1
@@ -325,7 +325,7 @@ function is_valid_value {
 
 function help {
 
-	echo "Usage: $(basename "${0}") [-g|--resource_group <value>] [-c|--cluster_name <value>] [-n|--sysdig_namespace] \ "
+	echo "Usage: $(basename "${0}") [-g|--resource_group <value>] [-c|--cluster_name <value>] [-n|--sysdig_namespace] \\ "
 	echo "                [-y|--yes] [-h | --help]"
 	echo ""
 	echo " -g  : Azure resource group where the AKS cluster is located (required)"
