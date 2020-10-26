@@ -17,7 +17,7 @@ function check_az_providers {
         echo "Azure Application Insights, Operational Insights or Operations Management providers not registered for this account"
         echo
         echo "*************"
-        echo "** WARNING ** Registering Azure providers the first time can take up to an hour"
+        echo "** WARNING ** Registering Azure providers the first time can take up to two hours"
         echo "*************"
         echo
         echo "More info at: "
