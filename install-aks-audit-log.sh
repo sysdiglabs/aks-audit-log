@@ -2,8 +2,60 @@
 
 set -euf
 
+step=1
+maxsteps=13
+
+function check_az_providers {
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Checking Azure Application Insights, Operational Insights and Operations Management providers are registered"
+    exists1=$(az provider show -n Microsoft.OperationsManagement -o tsv --query registrationState)
+    exists2=$(az provider show -n Microsoft.OperationalInsights -o tsv --query registrationState)
+    exists3=$(az provider show -n microsoft.insights -o tsv --query registrationState)
+    if [ "$exists1" != "Registered" ] || [ "$exists2" != "Registered" ] || [ "$exists3" != "Registered" ]; then
+        echo
+        echo "Azure Application Insights, Operational Insights or Operations Management providers not registered for this account"
+        echo
+        echo "*************"
+        echo "** WARNING ** Registering Azure providers the first time can take up to an hour"
+        echo "*************"
+        echo
+        echo "More info at: "
+        echo "  https://docs.microsoft.com/en-us/azure/azure-resource-manager/management/resource-providers-and-types"
+        echo "  https://github.com/MicrosoftDocs/azure-docs/blob/master/includes/log-analytics-troubleshoot-azure-diagnostics.md"
+        if [ "$prompt_yes" != "0" ]; then
+            echo
+            echo "You can manually register Azure providers on Azure portal as explained on those links"
+            echo "or executing:"
+            echo "  az provider register -n Microsoft.OperationalInsights"
+            echo "  az provider register -n Microsoft.OperationsManagement"
+            echo "  az provider register -n microsoft.insights"
+            
+            echo "Press CTRL+C to cancel AKS audit log installation and manually register providers"
+            
+            read -n 1 -s -r -p "Press ENTER to continue automatic registration and wait until it finishes"
+            echo
+        fi
+        echo "Invoking registration of Azure Operational Insights and Operations Management providers"
+        az provider register -n Microsoft.OperationalInsights
+        az provider register -n Microsoft.OperationsManagement
+        az provider register -n microsoft.insights
+        echo "You can stop the installation process here and retry later, registration happens in the backgroud."
+        echo "Waiting until state appears as 'Registered', this can take up to an hour..."
+        while [ "$exists1" != "Registered" ] || [ "$exists2" != "Registered" ] || [ "$exists3" != "Registered" ]
+        do
+            sleep 12
+            exists1=$(az provider show -n Microsoft.OperationsManagement -o tsv --query registrationState)
+            exists2=$(az provider show -n Microsoft.OperationalInsights -o tsv --query registrationState)
+            exists3=$(az provider show -n microsoft.insights -o tsv --query registrationState)
+        done
+    fi
+    echo "Azure Application Insights, Operational Insights and Operations Management are registered"
+}
 function check_commands_installed {
-    echo "[1/12] Checking requirements"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Checking requirements"
     local exists
     exists=$(which az ||:)
     if [ "$exists" == "" ]; then
@@ -147,15 +199,18 @@ function get_region {
 
 function create_event_hubs {
     ## Create Event Hubs namespace
-
-    echo "[2/12] Creating Event Hubs namespace: $ehubs_name"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Creating Event Hubs namespace: $ehubs_name"
     az eventhubs namespace create \
         --name "$ehubs_name" \
         --resource-group "$resource_group" \
         --location "$region" --output none
 
     # Message retention 1 day
-    echo "[3/12] Creating Event Hub: $hub_name"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Creating Event Hub: $hub_name"
     az eventhubs eventhub create --name "$hub_name" \
         --namespace-name "$ehubs_name" \
         --resource-group "$resource_group" \
@@ -163,20 +218,25 @@ function create_event_hubs {
         --partition-count 4 \
         --output none
 
-    echo "[4/12] Getting hub connection string"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Getting hub connection string"
     sleep 5
     hub_connection_string=$(az eventhubs namespace authorization-rule keys list \
         --resource-group "$resource_group" \
         --namespace-name "$ehubs_name" \
         --name RootManageSharedAccessKey \
         --output tsv --query primaryConnectionString)
-
-    echo "[5/12] Getting hub id"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Getting hub id"
     hub_id=$(az eventhubs namespace show --resource-group "$resource_group" --name "$ehubs_name" --output tsv --query id)
 }
 
 function create_diagnostic {
-    echo "[6/12] Creating diagnostic setting: $diagnostic_name"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Creating diagnostic setting: $diagnostic_name"
     ## Setting up aks diagnostics to send kube-audit to event hub
     az monitor diagnostic-settings create \
     --resource "$cluster_name" \
@@ -191,8 +251,9 @@ function create_diagnostic {
 
 function create_storage_account {
     ## Create storage account
-
-    echo "[7/12] Creating storage account: $storage_account"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Creating storage account: $storage_account"
 
     az storage account create \
         --name "$storage_account" \
@@ -201,13 +262,17 @@ function create_storage_account {
         --sku Standard_RAGRS \
         --kind StorageV2 --output none
 
-    echo "[8/12] Getting storage connection string"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Getting storage connection string"
     blob_connection_string=$(az storage account show-connection-string --key primary \
         --name "$storage_account" \
         --resource-group "$resource_group" \
         --output tsv --query connectionString)
 
-    echo "[9/12] Creating blob container: $blob_container"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Creating blob container: $blob_container"
     az storage container create \
         --name "$blob_container" \
         --connection-string "$blob_connection_string" \
@@ -216,7 +281,9 @@ function create_storage_account {
 
 
 function create_deployment {
-    echo "[10/12] Creating deployment manifest"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Creating deployment manifest"
 
     export EhubNamespaceConnectionString="$hub_connection_string"
     export BlobStorageConnectionString="$blob_connection_string"
@@ -227,15 +294,17 @@ function create_deployment {
     curl https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/deployment.yaml.in |
       envsubst > "$WORKDIR/deployment.yaml"
 
-    
-
-    echo "[11/12] Applying Kubernetes service"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Applying Kubernetes service"
 
     KUBECONFIG="$WORKDIR/tempkubeconfig" kubectl apply \
         -f https://raw.githubusercontent.com/sysdiglabs/aks-kubernetes-audit-log/master/service.yaml \
         -n "$sysdig_namespace"
 
-    echo "[12/12] Applying Kubernetes deployment"
+    echo -n "[$step/$maxsteps] "
+    step=$((step + 1))
+    echo "Applying Kubernetes deployment"
     
     export KUBECONFIG="$WORKDIR/tempkubeconfig"
     KUBECONFIG="$WORKDIR/tempkubeconfig" kubectl apply -f "$WORKDIR/deployment.yaml" -n "$sysdig_namespace"
@@ -366,6 +435,10 @@ echo "Destination:"
 echo "  * Resource group: $resource_group"
 echo "  * AKS cluster: $cluster_name"
 echo "  * Sysdig agent namespace: $sysdig_namespace"
+echo "Azure services to register:"
+echo "  * Azure Aplication Insights"
+echo "  * Azure Operational Insights"
+echo "  * Azure Operations Management"
 echo "Resources to install:"
 echo "  * Activate diagnostic setting $diagnostic_name in the cluster"
 echo "  * Storage account: $storage_account"
@@ -383,8 +456,9 @@ if [ "$prompt_yes" != "0" ]; then
     echo
 fi
 
-
+check_az_providers
 check_commands_installed
+exit
 check_cluster
 check_az_resources
 
