@@ -33,8 +33,6 @@ function check_az_providers {
             
             echo "Press CTRL+C to cancel AKS audit log installation and manually register providers"
             
-            read -n 1 -s -r -p "Press ENTER to continue automatic registration and wait until it finishes"
-            echo
         fi
         echo "Invoking registration of Azure Operational Insights and Operations Management providers"
         az provider register -n Microsoft.OperationalInsights
@@ -456,9 +454,9 @@ if [ "$prompt_yes" != "0" ]; then
     echo
 fi
 
-check_az_providers
+
 check_commands_installed
-exit
+check_az_providers
 check_cluster
 check_az_resources
 
