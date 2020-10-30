@@ -114,17 +114,32 @@ jobs:
           curl -X POST -s https://app.sysdigcloud.com/api/events -H 'Content-Type: application/json; charset=UTF-8' -H 'Authorization: Bearer '"${SYSDIG_SECURE_TOKEN}"'' -d '{"event":{"name":"CIS Dockerfile Benchmark - PR: '"${PR_TITLE}"' ","description":"'"${reportString}"'","severity":"6"}}' --compressed
           echo "###"
 
-  sysdig_image_scan:
-    name: Sysdig image scan
-    needs: [check_bash_installer, check_yaml, check_dotnet]
+  sysdig_image_scan_forwarder:
+    name: Sysdig image scan - Forwarder
+    needs: [check_yaml, check_dotnet]
     runs-on: ubuntu-16.04
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2      
       - name: Build the Docker image
-        run: docker build -f ./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile ./AKSKubeAuditReceiverSolution --tag sysdiglabs/aks-audit-log-forwarder:auto
+        run: docker build -f ./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile ./AKSKubeAuditReceiverSolution --tag sysdiglabs/aks-audit-log-forwarder
       - name: Sysdig Secure inline image scan
         uses: sysdiglabs/scan-action@v2
         with:
-          image-tag: "sysdiglabs/aks-audit-log-forwarder:auto"
+          image-tag: "sysdiglabs/aks-audit-log-forwarder"
           sysdig-secure-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+
+    sysdig_image_scan_installer:
+      name: Sysdig image scan - Installer
+      needs: [check_bash_installer]
+      runs-on: ubuntu-16.04
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v2      
+        - name: Build the Docker image
+          run: docker build -f ./build . --tag sysdiglabs/aks-audit-log-installer
+        - name: Sysdig Secure inline image scan
+          uses: sysdiglabs/scan-action@v2
+          with:
+            image-tag: "sysdiglabs/aks-audit-log-forwarder:auto"
+            sysdig-secure-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
