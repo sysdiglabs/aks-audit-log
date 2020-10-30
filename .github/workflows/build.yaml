@@ -232,7 +232,7 @@ jobs:
       - name: Build and push - Forwarder
         uses: docker/build-push-action@v2
         with:
-          context: AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/
+          context: AKSKubeAuditReceiverSolution/
           file: AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile
           platforms: linux/amd64
           push: true
