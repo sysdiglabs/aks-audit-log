@@ -15,6 +15,8 @@ on:
 jobs:
   check_bash_installer:
     name: Bash shell lint check
+    if: github.event_name != 'release'
+    # This action fails for release event because it can't find the commit SHA
     runs-on: ubuntu-16.04
     steps:
       - name: Checkout repo
@@ -195,7 +197,8 @@ jobs:
 
   publish_images:
     name: Publish container images to registries
-    needs: [sysdig_image_scan_forwarder, sysdig_image_scan_installer]
+    needs: [sysdig_image_scan_forwarder]
+    # We do not depend on scan of installer as check_shell can't run on release, so we skip those jobs
     runs-on: ubuntu-16.04    
     if: github.event_name == 'release'
     steps:
