@@ -1,0 +1,20 @@
+name: Update Docker Hub description for sysdiglabs/aks-audit-log-forwarder
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - build/README.md
+      - .github/workflows/dockerhub-description-forwarder.yml
+jobs:
+  dockerHubDescription:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Docker Hub description update
+      uses: peter-evans/dockerhub-description@v2
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+        repository: sysdiglabs/aks-audit-log-forwarder
