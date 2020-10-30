@@ -15,6 +15,10 @@ spec:
     metadata:
       labels:
         app: aks-audit-log-forwarder
+      annotations:
+        prometheus.io/path: /metrics
+        prometheus.io/port: "5000"
+        prometheus.io/scrape: "true"
     spec:
       containers:
         - image: sysdiglabs/aks-audit-log-forwarder:$ImageVersion

@@ -24,7 +24,7 @@ namespace AKSKubeAuditReceiver
         {
             var diagnosticSourceRegistration = DiagnosticSourceAdapter.StartListening();
 
-            Server = new MetricServer(port: 1234);
+            Server = new MetricServer(port: 5000);
             Server.Start();
         }
 
