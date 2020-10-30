@@ -7,9 +7,10 @@ on:
     branches:
       - master
   page_build:
+  workflow_dispatch:
   release:
     types:
-      - created
+      - published
 
 jobs:
   check_bash_installer:
@@ -82,8 +83,8 @@ jobs:
       - name: Dotnet test solution
         run: dotnet test AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
 
-  sysdig_dockerfile_cis_benchmark:
-    name: Sysdig Dockerfile CIS benchmark
+  sysdig_dockerfile_cis_benchmark_forwarder:
+    name: Sysdig Dockerfile CIS benchmark - Forwarder
     needs: [check_bash_installer, check_yaml, check_dotnet]
     runs-on: ubuntu-16.04
     steps:
@@ -114,9 +115,42 @@ jobs:
           curl -X POST -s https://app.sysdigcloud.com/api/events -H 'Content-Type: application/json; charset=UTF-8' -H 'Authorization: Bearer '"${SYSDIG_SECURE_TOKEN}"'' -d '{"event":{"name":"CIS Dockerfile Benchmark - PR: '"${PR_TITLE}"' ","description":"'"${reportString}"'","severity":"6"}}' --compressed
           echo "###"
 
+  sysdig_dockerfile_cis_benchmark_installer:
+    name: Sysdig Dockerfile CIS benchmark - Installer
+    needs: [check_bash_installer, check_yaml, check_dotnet]
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+      - name: Sysdig CIS dockerfile benchmark
+        uses: sysdiglabs/benchmark-dockerfile@v1.0.0
+        id: cis_dockerfile_benchmark
+        with:
+          directory: './build'
+          dockerfilePattern: 'Dockerfile'
+          disallowedPackages: 'netcat'
+          secretPatterns: 'aws_secret,pass'    
+      - name: Post run Sysdig CIS dockerfile benchmark
+        env:
+          SYSDIG_SECURE_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_OWNER: ${{ github.event.pull_request.head.user.login }}
+        run: |
+          echo "###"
+          echo "{\"pr_name\": \"${PR_TITLE}\", \"pr_sha\": \"${PR_SHA}\", \"pr_owner\": \"${PR_OWNER}\"}" > /tmp/report.json
+          echo ${{ toJSON(steps.cis_dockerfile_benchmark.outputs.violation_report) }} > /tmp/report
+          reportString=$(sed 's/"/\\"/g' /tmp/report)
+          echo $reportString
+          
+          # send result to Sysdig monitor
+          curl -X POST -s https://app.sysdigcloud.com/api/events -H 'Content-Type: application/json; charset=UTF-8' -H 'Authorization: Bearer '"${SYSDIG_SECURE_TOKEN}"'' -d '{"event":{"name":"CIS Dockerfile Benchmark - PR: '"${PR_TITLE}"' ","description":"'"${reportString}"'","severity":"6"}}' --compressed
+          echo "###"
+
+
   sysdig_image_scan_forwarder:
     name: Sysdig image scan - Forwarder
-    needs: [check_yaml, check_dotnet]
+    needs: [check_bash_installer, check_yaml, check_dotnet]
     runs-on: ubuntu-16.04
     steps:
       - name: Checkout repo
@@ -129,17 +163,18 @@ jobs:
           image-tag: "sysdiglabs/aks-audit-log-forwarder"
           sysdig-secure-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
 
-    sysdig_image_scan_installer:
-      name: Sysdig image scan - Installer
-      needs: [check_bash_installer]
-      runs-on: ubuntu-16.04
-      steps:
-        - name: Checkout repo
-          uses: actions/checkout@v2      
-        - name: Build the Docker image
-          run: docker build -f ./build . --tag sysdiglabs/aks-audit-log-installer
-        - name: Sysdig Secure inline image scan
-          uses: sysdiglabs/scan-action@v2
-          with:
-            image-tag: "sysdiglabs/aks-audit-log-forwarder:auto"
-            sysdig-secure-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+  sysdig_image_scan_installer:
+    name: Sysdig image scan - Installer
+    needs: [check_bash_installer, check_yaml, check_dotnet]
+    runs-on: ubuntu-16.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2      
+      - name: Build the Docker image
+        run: docker build -f ./build/Dockerfile . --tag sysdiglabs/aks-audit-log-installer
+      - name: Sysdig Secure inline image scan
+        uses: sysdiglabs/scan-action@v2
+        with:
+          image-tag: "sysdiglabs/aks-audit-log-installer"
+          sysdig-secure-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+
