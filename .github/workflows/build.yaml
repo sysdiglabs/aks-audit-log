@@ -21,7 +21,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-
       - name: Bash shell lint check with shellcheck
         uses: reviewdog/action-shellcheck@v1
         with:
@@ -38,7 +37,6 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-
       - name: 'Yaml lint'
         uses: karancode/yamllint-github-action@master
         with:
@@ -56,12 +54,10 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v2
-
       - name: Create Dotnet environment
         uses: actions/setup-dotnet@v1
         with:
           dotnet-version: '3.1.100' # SDK Version to use.
-
       - name: Restore cached nuget packages
         uses: actions/cache@v1
         with:
@@ -69,19 +65,14 @@ jobs:
           key: ${{ runner.os }}-nuget-${{ hashFiles('**/packages.lock.json') }}
           restore-keys: |
             ${{ runner.os }}-nuget-
-
       - name: Dotnet lint install dotnet-format for linting
         run: dotnet tool install -g dotnet-format --version 3.3.111304
-
       - name: Dotnet lint install report generator
         uses: xt0rted/dotnet-format-problem-matcher@v1
-
       - name: Dotnet lint check with dotnet-format
-        run: dotnet format  --folder AKSKubeAuditReceiverSolution/ --check --dry-run  || true
-
+        run: dotnet format --folder AKSKubeAuditReceiverSolution/ --check --dry-run || true
       - name: Dotnet build solution
         run: dotnet build AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
-
       - name: Dotnet test solution
         run: dotnet test AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver.sln
 
@@ -144,7 +135,6 @@ jobs:
           echo ${{ toJSON(steps.cis_dockerfile_benchmark.outputs.violation_report) }} > /tmp/report
           reportString=$(sed 's/"/\\"/g' /tmp/report)
           echo $reportString
-          
           # send result to Sysdig monitor
           curl -X POST -s https://app.sysdigcloud.com/api/events -H 'Content-Type: application/json; charset=UTF-8' -H 'Authorization: Bearer '"${SYSDIG_SECURE_TOKEN}"'' -d '{"event":{"name":"CIS Dockerfile Benchmark - PR: '"${PR_TITLE}"' ","description":"'"${reportString}"'","severity":"6"}}' --compressed
           echo "###"
@@ -194,11 +184,11 @@ jobs:
           echo "Scan result: $SCAN_RESULT"
           # exit $SCAN_RESULT
 
-
   publish_images:
     name: Publish container images to registries
     needs: [sysdig_image_scan_forwarder]
-    # We do not depend on scan of installer as check_shell can't run on release, so we skip those jobs
+    # We do not depend on scan of installer as check_shell can't run on release,
+    # and scan for installer result is skipped
     runs-on: ubuntu-16.04    
     if: github.event_name == 'release'
     steps:
@@ -213,12 +203,12 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      # - name: Login to GitHub Container Registry
-      #   uses: docker/login-action@v1 
-      #   with:
-      #     registry: ghcr.io
-      #     username: ${{ github.repository_owner }}
-      #     password: ${{ secrets.CR_PAT }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v1 
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.CR_PAT_PKG }}
       - name: Prepare version major
         id: prepare_version_major
         env:
@@ -239,5 +229,14 @@ jobs:
             sysdiglabs/aks-audit-log-installer:latest
             sysdiglabs/aks-audit-log-installer:${{ github.event.release.tag_name }}
             sysdiglabs/aks-audit-log-installer:${{ steps.prepare_version_major.outputs.VERSION_MAJOR }}
-
-        # ghcr.io/sysdiglabs/aks-audit-log-installer:latest
+      - name: Build and push - Forwarder
+        uses: docker/build-push-action@v2
+        with:
+          context: AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/
+          file: AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            sysdiglabs/aks-audit-log-forwarder:latest
+            sysdiglabs/aks-audit-log-forwarder:${{ github.event.release.tag_name }}
+            sysdiglabs/aks-audit-log-forwarder:${{ steps.prepare_version_major.outputs.VERSION_MAJOR }}
