@@ -209,15 +209,18 @@ jobs:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
           password: ${{ secrets.CR_PAT_PKG }}
-      - name: Prepare version major
-        id: prepare_version_major
+      - name: Prepare version labels
+        id: prepare_version_labels
         env:
-          VERSION_FULL: ${{ github.event.release.tag_name }}
+          VERSION_TAG: ${{ github.event.release.tag_name }}
         run: |
-          echo "Version full: $VERSION_FULL"
-          VERSION_MAJOR=$(echo $VERSION_FULL | sed 's/[^0-9]*\([0-9]\+\).*/\1/')
+          echo "Version tag: $VERSION_TAG"
+          VERSION_MAJOR=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+\).*/\1/')
+          VERSION_FULL=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+.*\)/\1/')
           echo "Version major: $VERSION_MAJOR"
+          echo "Version full: $VERSION_FULL"
           echo "::set-output name=VERSION_MAJOR::$VERSION_MAJOR"
+          echo "::set-output name=VERSION_FULL::$VERSION_FULL"
       - name: Build and push - Installer
         uses: docker/build-push-action@v2
         with:
@@ -227,8 +230,8 @@ jobs:
           push: true
           tags: |
             sysdiglabs/aks-audit-log-installer:latest
-            sysdiglabs/aks-audit-log-installer:${{ github.event.release.tag_name }}
-            sysdiglabs/aks-audit-log-installer:${{ steps.prepare_version_major.outputs.VERSION_MAJOR }}
+            sysdiglabs/aks-audit-log-installer:${{ steps.prepare_version_labels.outputs.VERSION_MAJOR }}
+            sysdiglabs/aks-audit-log-installer:${{ steps.prepare_version_labels.outputs.VERSION_FULL }}
       - name: Build and push - Forwarder
         uses: docker/build-push-action@v2
         with:
@@ -238,5 +241,5 @@ jobs:
           push: true
           tags: |
             sysdiglabs/aks-audit-log-forwarder:latest
-            sysdiglabs/aks-audit-log-forwarder:${{ github.event.release.tag_name }}
-            sysdiglabs/aks-audit-log-forwarder:${{ steps.prepare_version_major.outputs.VERSION_MAJOR }}
+            sysdiglabs/aks-audit-log-forwarder:${{ steps.prepare_version_labels.outputs.VERSION_MAJOR }}
+            sysdiglabs/aks-audit-log-forwarder:${{ steps.prepare_version_labels.outputs.VERSION_FULL }}
