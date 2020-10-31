@@ -6,7 +6,8 @@ INSTALLER_MINOR=1.1
 FORWARDER_IMAGE=sysdiglabs/aks-audit-log-installer
 FORWARDER_IMAGE=1
 FORWARDER_IMAGE=1.0.0
-FORWARDER_DIR=./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/
+FORWARDER_DIR=./AKSKubeAuditReceiverSolution/
+FORWARDER_DOCKERFILE=${FORWARDER_DIR}/AKSKubeAuditReceiver/Dockerfile
 
 RESOURCE_GROUP="aks-test-group"
 CLUSTER_NAME="aks-test-cluster"
@@ -48,7 +49,7 @@ forwarder-push-dev:
 	docker push ${FORWARDER_IMAGE}:dev
 
 forwarder-build:
-	docker build ${FORWARDER_DIR} -f ${FORWARDER_DIR}/Dockerfile \
+	docker build ${FORWARDER_DIR} -f ${FORWARDER_DOCKERFILE} \
 		-t ${FORWARDER_IMAGE}:latest -t ${FORWARDER_IMAGE}:${FORWARDER_MAYOR} -t ${FORWARDER_IMAGE}:${FORWARDER_MINOR}
 
 forwarder-push: check installer-build inline-scan
