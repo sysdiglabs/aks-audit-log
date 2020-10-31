@@ -7,6 +7,7 @@ WORKDIR /app
 
 COPY ./install-aks-audit-log.sh .
 COPY ./uninstall-aks-audit-log.sh .
+COPY ./deployment.yaml.in .
 
 WORKDIR /data
 
