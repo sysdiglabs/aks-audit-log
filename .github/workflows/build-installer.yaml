@@ -107,19 +107,23 @@ jobs:
           SCAN_RESULT=${PIPESTATUS[0]}
           echo "::set-output name=SCAN_RESULT::$SCAN_RESULT"
           echo "Scan finished with result: $SCAN_RESULT"
-      - name: Scan result
+      - name: SCAN RESULT
         env:
           SCAN_RESULT: ${{ steps.run_sysdig_inline_scan.outputs.SCAN_RESULT }}
         run: |
           cat sysdig_image_scan_result.txt
-          echo "Scan result: $SCAN_RESULT"
-          # exit $SCAN_RESULT
+          echo ; echo "******************************"
+          [ "$SCAN_RESULT" -eq 0 ] && echo "** Scan result  > PASS <    **"
+          [ "$SCAN_RESULT" -eq 1 ] && echo "** Scan result  > FAIL <    **"
+          [ "$SCAN_RESULT" -eq 2 ] && echo "** Wrong script invokation  **"
+          [ "$SCAN_RESULT" -eq 3 ] && echo "** Runtime error            **"
+          echo "******************************" ; echo
+          exit $SCAN_RESULT
 
   publish_images:
     name: Publish container images to registries
     needs: [sysdig_image_scan]
-    runs-on: ubuntu-16.04    
-    if: github.event_name == 'release'
+    runs-on: ubuntu-16.04
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -132,12 +136,6 @@ jobs:
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_PASSWORD }}
-      - name: Login to GitHub Container Registry
-        uses: docker/login-action@v1 
-        with:
-          registry: ghcr.io
-          username: ${{ github.repository_owner }}
-          password: ${{ secrets.CR_PAT_PKG }}
       - name: Prepare version labels
         id: prepare_version_labels
         env:
@@ -146,13 +144,13 @@ jobs:
           echo "Version tag: $VERSION_TAG"
           VERSION_MAJOR=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+\).*/\1/')
           VERSION_FULL=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+.*\)/\1/')
-          [ -z $VERSION_FULL ] VERSION_FULL="master"
-          [ -z $VERSION_MAJOR ] VERSION_FULL="master"
+          [ -z $VERSION_FULL ] && VERSION_FULL="master"
+          [ -z $VERSION_MAJOR ] && VERSION_MAJOR="dev"
           echo "Version major: $VERSION_MAJOR"
           echo "Version full: $VERSION_FULL"
           echo "::set-output name=VERSION_MAJOR::$VERSION_MAJOR"
           echo "::set-output name=VERSION_FULL::$VERSION_FULL"
-      - name: Build and push
+      - name: Build and push Docker Hub
         uses: docker/build-push-action@v2
         with:
           context: .
@@ -163,3 +161,20 @@ jobs:
             sysdiglabs/aks-audit-log-installer:latest
             sysdiglabs/aks-audit-log-installer:${{ steps.prepare_version_labels.outputs.VERSION_MAJOR }}
             sysdiglabs/aks-audit-log-installer:${{ steps.prepare_version_labels.outputs.VERSION_FULL }}
+      - name: Login to GitHub Packages
+        if: github.event_name == 'release'
+        uses: docker/login-action@v1 
+        with:
+          registry: docker.pkg.github.com
+          username: ${{ github.CR_PAT_PKG_USER }}
+          password: ${{ secrets.CR_PAT_PKG }}
+      - name: Build and push GitHub Packages
+        if: github.event_name == 'release'
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          file: ./build/Dockerfile
+          platforms: linux/amd64
+          push: true
+          tags: |
+            docker.pkg.github.com/sysdiglabs/aks-audit-log/aks-audit-log-installer:${{ steps.prepare_version_labels.outputs.VERSION_FULL }}
