@@ -150,7 +150,6 @@ jobs:
           file: AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile
           platforms: linux/amd64
           push: true
-          load: true
           tags: |
             sysdiglabs/aks-audit-log-forwarder:latest
             sysdiglabs/aks-audit-log-forwarder:${{ steps.prepare_version_labels.outputs.VERSION_MAJOR }}
