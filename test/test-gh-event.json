@@ -1,0 +1,18 @@
+{
+    "pull_request": {
+      "head": {
+        "ref": "sample-head-ref",
+        "sha": "50524bcd2d8c8aeb5e0b21b0731cb945372e7792",
+        "user": {
+            "login": "sample-username"
+        }
+      },
+      "title": "Sample title",
+      "base": {
+        "ref": "sample-base-ref"
+      }
+    },
+    "release": {
+      "tag_name": "v1.2.1"
+    }
+  }

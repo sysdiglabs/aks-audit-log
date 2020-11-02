@@ -114,6 +114,12 @@ check-dotnet:
 
 # -----------------------------------------------------------------------------
 
+test-gh-actions:
+	@if [ -z "$$(command -v act)" ]; then echo "Requires act command installed" ; exit -1 ; fi
+	act workflow_dispatch -n -e ./test/test-gh-event.json
+
+# -----------------------------------------------------------------------------
+
 build-image:
 	docker build ${IMAGE_DIR} -f ${IMAGE_DOCKERFILE} \
 		-t ${DOCKERHUB_ORG}/${IMAGE}:latest \
