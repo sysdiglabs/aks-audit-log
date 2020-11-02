@@ -150,6 +150,7 @@ jobs:
           file: AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile
           platforms: linux/amd64
           push: true
+          load: true
           tags: |
             sysdiglabs/aks-audit-log-forwarder:latest
             sysdiglabs/aks-audit-log-forwarder:${{ steps.prepare_version_labels.outputs.VERSION_MAJOR }}
@@ -161,13 +162,16 @@ jobs:
           registry: docker.pkg.github.com
           username: ${{ secrets.CR_PAT_PKG_USER }}
           password: ${{ secrets.CR_PAT_PKG }}
-      - name: Build and push GitHub Packages
-        if: github.event_name == 'release'
-        uses: docker/build-push-action@v2
-        with:
-          context: AKSKubeAuditReceiverSolution/
-          file: AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile
-          platforms: linux/amd64
-          push: true
-          tags: |
-            docker.pkg.github.com/sysdiglabs/aks-audit-log/aks-audit-log-forwarder:${{ steps.prepare_version_labels.outputs.VERSION_FULL }}
+      - name: Build and Push to GitHub Packages
+        run: |
+          docker build ${CONTEXT_PATH} -f ${DOCKERFILE_PATH} \
+            -t docker.pkg.github.com/${GH_REPO}/${IMAGE_NAME}:${VERSION_FULL}
+          docker push \
+               docker.pkg.github.com/${GH_REPO}/${IMAGE_NAME}:${VERSION_FULL}
+        env:
+          IMAGE_NAME: aks-audit-log-forwarder
+          CONTEXT_PATH: AKSKubeAuditReceiverSolution/
+          DOCKERFILE_PATH: AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile
+          VERSION_FULL: ${{ steps.prepare_version_labels.outputs.VERSION_FULL }}
+          GH_REPO: sysdiglabs/aks-audit-log
+          
