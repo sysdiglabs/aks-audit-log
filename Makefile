@@ -114,9 +114,21 @@ check-dotnet:
 
 # -----------------------------------------------------------------------------
 
+build: forwarder-build
+
+# -----------------------------------------------------------------------------
+
 test-gh-actions:
 	@if [ -z "$$(command -v act)" ]; then echo "Requires act command installed" ; exit -1 ; fi
-	act workflow_dispatch -n -e ./test/test-gh-event.json
+	@bash -c "act release -n -e ./test/test-gh-event.json 2> >(tee /tmp/gh-actions-errors.log >&2)" ; \
+	if [ -s /tmp/gh-actions-errors.log ]; then \
+		cat /tmp/gh-actions-errors.log ; \
+		echo "> Errors found"; \
+		exit -1; \
+	fi ; \
+	echo "> No errors on release event workflows"
+
+all-tests: check build test-gh-actions
 
 # -----------------------------------------------------------------------------
 
