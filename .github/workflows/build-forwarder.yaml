@@ -162,6 +162,7 @@ jobs:
           username: ${{ secrets.CR_PAT_PKG_USER }}
           password: ${{ secrets.CR_PAT_PKG }}
       - name: Build and Push to GitHub Packages
+        if: github.event_name == 'release'
         run: |
           docker build ${CONTEXT_PATH} -f ${DOCKERFILE_PATH} \
             -t docker.pkg.github.com/${GH_REPO}/${IMAGE_NAME}:${VERSION_FULL}
