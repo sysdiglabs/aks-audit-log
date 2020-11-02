@@ -97,7 +97,7 @@ uninstall:
 check: check-shell check-yaml check-dotnet
 
 check-shell:
-	docker run --rm --mount type=bind,source=$(PWD)/,target=/data koalaman/shellcheck shellcheck /data/*.sh
+	docker run -v "$$PWD:/mnt" koalaman/shellcheck *.sh
 
 check-yaml:
 	yamllint ./*.yaml*
