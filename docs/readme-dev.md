@@ -31,6 +31,30 @@ A standard AKS cluster with 3 nodes and no workload will need less than 1 Mb/s o
 
 Tested with AKS created with Kubernetes version 1.15.10
 
+## Log verbose levels
+
+The service includes a `VerboseLevel` parameter in its deployment configuration that sets what is sent to its log:
+
+ * Level 1: Only errors are shown
+ * Level 2: A log entry is shown for every Event hub event (they pack several Kubernetes audit log inside it)
+ * Level 3: Same as previous, and each Kubernetes audit log event unpacked also are shown in a log entry.
+ * Level 4: Same as previous, and each POST to the service for each Kubernetes audit log event has a log entry, as well as each response to the POST. In addition, at service start some initial parameters are shown: EventHubName, BlobContainerName, WebSinkURL, VerboseLevel, EhubNamespaceConnectionString length, BlobStorageConnectionString length.
+
+You can follow the output log with:
+```
+kubectl logs -l app=aks-audit-log-forwarder -f --namespace sysdig-agent
+```
+
+You can edit the ConfigMap and restart the service’s pod to change the verbose level:
+```
+kubectl edit deployment aks-audit-log-forwarder
+```
+
+When events and other information have an entry in the log, they do not show the full event content, but a summary log line to make it easier to debug any situation. If you are interested in capturing the full Kubernetes audit log events, see below information to activate "Send to Log Analytics" on the cluster _diagnostic settings_.
+
+Setting a higher verbose level has a small negative impact on the service performance, that is more important in big clusters with more events. We do not show full event contents in the log to mitigate it.
+
+
 ## Manual deployment
 
 1. Create several Azure resources:
@@ -51,20 +75,17 @@ Take into consideration that if you create the Log Analytics in the same step th
        * cluster-autoscaler: No
    * metric:
        * AllMetrics: No
-   * Send to Log Analytics: Yes
+   * Send to Log Analytics (optional): Yes
        * Subscription: \<your subscription>
        * Log Analytics workspace: \<your Log Analytics workspace>
-   * Stream to an event hub
+   * Stream to an event hub: Yes
        * Subscription: \<your subscription>
        * Event hub namespace: \<your Event Hubs>
        * Event hub name: (leave blank)
        * Event hub policy name: RootManagedSharedAccessKey (default value)
    * Archite to a storage account: No
-   * Stream to an event hub: Yes
-       * Subscription: \<your subscription>
-       * Event hub namespace: \<your Event Hubs>
-       * Event hub name (optional): (leave blank)
-       * Event hub policy name: RootManageSharedAccessKey (default)
+
+If you activate "Send to Log Analytics", you will send all Kubernetes audit log events to a Log Analytics workspace in adition to the forwarder for Sysdig.
 
 4. Set up `kubectl` access to the cluster
 

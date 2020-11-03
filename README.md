@@ -82,4 +82,4 @@ curl -s https://raw.githubusercontent.com/sysdiglabs/aks-audit-log/master/uninst
 
 ## More information
 
-Check the [developer documentation](./docs/readme-dev.md) for architecture and manual installation details.
+Check the [developer documentation](./docs/readme-dev.md) for aditional documentation about architecture, implementation, dependencies, Log verbose levels, manual deployment, and reference links.
