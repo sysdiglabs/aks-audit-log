@@ -1,6 +1,6 @@
-
-VERSION_FULL=1.2.1
-VERSION_MAJOR=$(shell echo "${VERSION_FULL}" | sed 's/[^0-9]*\([0-9]\+\).*/\1/' )
+VERSION_TAG=$(shell git describe --tags $(git rev-list --tags --max-count=1))
+VERSION_MAJOR=$(shell echo "${VERSION_TAG}"  | sed 's/[^0-9]*\([0-9]\+.*\)/\1/' )
+VERSION_FULL=$(shell echo "${VERSION_TAG}"   | sed 's/[^0-9]*\([0-9]\+\).*/\1/' )
 
 INSTALLER_IMAGE=aks-audit-log-installer
 INSTALLER_DIR=./
@@ -91,7 +91,6 @@ uninstall:
 		${DOCKERHUB_ORG}/${INSTALLER_IMAGE}:${MINOR} \
 		-g ${RESOURCE_GROUP} -c ${CLUSTER_NAME}
 
-
 # -----------------------------------------------------------------------------
 
 check: check-shell check-yaml check-dotnet
@@ -131,6 +130,11 @@ test-gh-actions:
 all-tests: check build test-gh-actions
 
 # -----------------------------------------------------------------------------
+
+show-version:
+	@echo "Version tag: ${VERSION_TAG}"
+	@echo "Version full: ${VERSION_FULL}"
+	@echo "Version major: ${VERSION_MAJOR}"
 
 build-image:
 	docker build ${IMAGE_DIR} -f ${IMAGE_DOCKERFILE} \
