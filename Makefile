@@ -148,7 +148,7 @@ push:
 	docker push ${DOCKERHUB_ORG}/${IMAGE}:${VERSION_FULL}
 	docker push ${DOCKERHUB_ORG}/${IMAGE}:${VERSION_MAJOR}
 
-update-dockerhub-readme:
+update-dockerhub-readme-docker:
 	echo 'Updating Dockerhub description' ; \
 	echo 'Readme: ${DESC_PATH}' ; \
 	echo 'Repository: ${IMAGE}' ; \
@@ -158,6 +158,23 @@ update-dockerhub-readme:
 		-e DOCKERHUB_REPOSITORY='${IMAGE}' \
 		-e README_FILEPATH='/workspace/README.md' \
 		peterevans/dockerhub-description:2
+
+update-dockerhub-readme:
+	@TOKEN=$$(curl -s -H "Content-Type: application/json" -X POST -d '{"username": "'${DOCKERHUB_USERNAME}'", "password": "'${DOCKERHUB_PASSWORD}'"}' \
+    	https://hub.docker.com/v2/users/login/ | jq -r .token) && \
+	CODE=$$(jq -n --arg msg "$$(<${DESC_PATH})" '{"full_description": $$msg }' | \
+		curl -s -o /dev/null  -L -w "%{http_code}" \
+			https://hub.docker.com/v2/repositories/${IMAGE}/ \
+			-d @- -X PATCH \
+			-H "Content-Type: application/json" \
+			-H "Authorization: JWT $${TOKEN}" \
+  	) ; \
+	if [ "$${CODE}" = "200" ]; then \
+    	printf "Successfully updated Docker Hub description" ;\
+  	else \
+    	printf "Unable to updated Docker Hub description, response code: %s\n" "$${CODE}" ; \
+    	exit 1 ; \
+  	fi \
 
 gh-pkg-release:
 	cat ${GITHUB_PAT_PATH} | docker login https://docker.pkg.github.com -u ${GITHUB_USER} --password-stdin
