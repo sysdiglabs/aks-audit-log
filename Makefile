@@ -4,7 +4,7 @@ VERSION_FULL=$(shell echo "${VERSION_TAG}"   | sed 's/[^0-9]*\([0-9]\+\).*/\1/' 
 
 INSTALLER_IMAGE=aks-audit-log-installer
 INSTALLER_DIR=./
-INSTALLER_DESC=${FORWARDER_DIR}/README.md
+INSTALLER_DESC=${INSTALLER_DIR}/build/README.md
 INSTALLER_DOCKERFILE=${INSTALLER_DIR}/build/Dockerfile
 
 FORWARDER_IMAGE=aks-audit-log-forwarder
