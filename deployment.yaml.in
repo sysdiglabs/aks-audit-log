@@ -37,13 +37,13 @@ spec:
             exec:
               command:
                 - wget
-                - localhost:1234/metrics
+                - localhost:5000/metrics
                 - --spider
             initialDelaySeconds: 10
           livenessProbe:
             httpGet:
               path: /metrics
-              port: 1234
+              port: 5000
             initialDelaySeconds: 10
             periodSeconds: 20
           env:
