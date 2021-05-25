@@ -181,10 +181,17 @@ gh-pkg-release:
 	docker build . -f build/Dockerfile -t docker.pkg.github.com/${GITHUB_REPO}/${IMAGE_NAME}:${VERSION_FULL}
 	docker push docker.pkg.github.com/${GITHUB_REPO}/${IMAGE_NAME}:${VERSION_FULL}
 
+UNAME := $(shell uname)
 inline-scan:
-	@curl -s https://download.sysdig.com/stable/inline_scan.sh | \
-		bash -s -- \
-		analyze -s https://secure.sysdig.com -o -k ${SYSDIG_SECURE_API_TOKEN} ${IMAGE} ; \
+	if [ "${UNAME}"=="Darwin" ]; then DOCKER_USER="-u 0"; else DOCKER_USER=""; fi ; \
+	docker run $$DOCKER_USER --rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		quay.io/sysdig/secure-inline-scan:2 \
+		--sysdig-url https://secure.sysdig.com \
+		--sysdig-token "${SYSDIG_SECURE_API_TOKEN}" \
+		--storage-type docker-daemon \
+		--storage-path /var/run/docker.sock \
+		${IMAGE} ; \
 	RESULT=$$? ; \
 	echo ; echo "******************************" ; \
 	[ "$$RESULT" -eq 0 ] && echo "** Scan result  > PASS <    **" ; \
