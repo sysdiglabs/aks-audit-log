@@ -107,11 +107,18 @@ jobs:
         run: |
           docker build -f ./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile \
             ./AKSKubeAuditReceiverSolution --tag sysdiglabs/aks-audit-log-forwarder
-      - name: Sysdig Secure inline image scan
-        uses: sysdiglabs/scan-action@v2
+      - name: Scan image
+        id: scan
+        uses: sysdiglabs/scan-action@v3
         with:
           image-tag: "sysdiglabs/aks-audit-log-forwarder"
           sysdig-secure-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+          input-type: docker-daemon
+          run-as-user: root
+      - uses: github/codeql-action/upload-sarif@v1
+        if: always()
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarifReport }}
 
   publish_image:
     name: Publish container image to registries
