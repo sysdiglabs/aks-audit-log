@@ -150,8 +150,9 @@ jobs:
           VERSION_TAG: ${{ github.event.release.tag_name }}
         run: |
           echo "Version tag: $VERSION_TAG"
-          VERSION_MAJOR=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+\).*/\1/')
-          VERSION_FULL=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+.*\)/\1/')
+          VERSION_MAJOR=$(echo $VERSION_TAG | sed 's/v\([0-9]*\).*/\1/' )
+          VERSION_FULL=$(echo $VERSION_TAG | sed 's/v\([0-9][0-9\.]*\).*/\1/' )
+          [ -z $VERSION_TAG ] && VERSION_FULL="master"
           [ -z $VERSION_FULL ] && VERSION_FULL="master"
           [ -z $VERSION_MAJOR ] && VERSION_MAJOR="dev"
           echo "Version major: $VERSION_MAJOR"

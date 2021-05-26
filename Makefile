@@ -1,6 +1,6 @@
 VERSION_TAG=$(shell git describe --tags $(git rev-list --tags --max-count=1))
-VERSION_MAJOR=$(shell echo "${VERSION_TAG}"  | sed 's/[^0-9]*\([0-9]\+.*\)/\1/' )
-VERSION_FULL=$(shell echo "${VERSION_TAG}"   | sed 's/[^0-9]*\([0-9]\+\).*/\1/' )
+VERSION_MAJOR=$(shell echo "${VERSION_TAG}"  | sed 's/v\([0-9]*\).*/\1/' )
+VERSION_FULL=$(shell echo "${VERSION_TAG}"   | sed 's/v\([0-9][0-9\.]*\).*/\1/' )
 
 INSTALLER_IMAGE=sysdiglabs/aks-audit-log-installer
 INSTALLER_DIR=./
@@ -132,8 +132,9 @@ all-tests: check build test-gh-actions
 
 show-version:
 	@echo "Version tag: ${VERSION_TAG}"
-	@echo "Version full: ${VERSION_FULL}"
 	@echo "Version major: ${VERSION_MAJOR}"
+	@echo "Version full: ${VERSION_FULL}"
+	
 
 build-image:
 	docker build ${IMAGE_DIR} -f ${IMAGE_DOCKERFILE} \
