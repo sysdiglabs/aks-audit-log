@@ -101,9 +101,17 @@ jobs:
         id: run_sysdig_inline_scan
         env:
           SYSDIG_SECURE_TOKEN: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
-        run: |
-          docker run sysdiglabs/secure-inline-scan:2 -s https://secure.sysdig.com -k $SYSDIG_SECURE_TOKEN sysdiglabs/aks-audit-log-installer \
-            | tee sysdig_image_scan_result.txt
+        run: |          
+          docker run --rm \
+              -v /var/run/docker.sock:/var/run/docker.sock \
+              quay.io/sysdig/secure-inline-scan:2 \
+              --sysdig-url https://secure.sysdig.com \
+              --sysdig-token "$SYSDIG_SECURE_TOKEN" \
+              --storage-type docker-daemon \
+              --storage-path /var/run/docker.sock \
+              sysdiglabs/aks-audit-log-installer \
+              | tee sysdig_image_scan_result.txt
+
           SCAN_RESULT=${PIPESTATUS[0]}
           echo "::set-output name=SCAN_RESULT::$SCAN_RESULT"
           echo "Scan finished with result: $SCAN_RESULT"
@@ -134,16 +142,17 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v1 
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ secrets.SYSDIGLABS_DOCKERHUB_USER }}
+          password: ${{ secrets.SYSDIGLABS_DOCKERHUB_TOKEN }}
       - name: Prepare version labels
         id: prepare_version_labels
         env:
           VERSION_TAG: ${{ github.event.release.tag_name }}
         run: |
           echo "Version tag: $VERSION_TAG"
-          VERSION_MAJOR=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+\).*/\1/')
-          VERSION_FULL=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+.*\)/\1/')
+          VERSION_MAJOR=$(echo $VERSION_TAG | sed 's/v\([0-9]*\).*/\1/' )
+          VERSION_FULL=$(echo $VERSION_TAG | sed 's/v\([0-9][0-9\.]*\).*/\1/' )
+          [ -z $VERSION_TAG ] && VERSION_FULL="master"
           [ -z $VERSION_FULL ] && VERSION_FULL="master"
           [ -z $VERSION_MAJOR ] && VERSION_MAJOR="dev"
           echo "Version major: $VERSION_MAJOR"
@@ -158,9 +167,9 @@ jobs:
           platforms: linux/amd64
           push: true
           tags: |
-            sysdiglabs/aks-audit-log-installer:latest
-            sysdiglabs/aks-audit-log-installer:${{ steps.prepare_version_labels.outputs.VERSION_MAJOR }}
-            sysdiglabs/aks-audit-log-installer:${{ steps.prepare_version_labels.outputs.VERSION_FULL }}
+            quay.io/sysdig/aks-audit-log-installer:latest
+            quay.io/sysdig/aks-audit-log-installer:${{ steps.prepare_version_labels.outputs.VERSION_MAJOR }}
+            quay.io/sysdig/aks-audit-log-installer:${{ steps.prepare_version_labels.outputs.VERSION_FULL }}
       - name: Login to GitHub Packages
         if: github.event_name == 'release'
         uses: docker/login-action@v1 

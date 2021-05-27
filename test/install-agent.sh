@@ -2,6 +2,9 @@
 
 set -euf
 
+my_resource_group="${RESOURCE_GROUP:-aks-test-group}"
+my_cluster_name="${CLUSTER_NAME:-aks-test-cluster}"
+
 echo "Getting Kubectl credentials"
 az aks get-credentials --name "$my_cluster_name" --resource-group "$my_resource_group" --overwrite-existing
 

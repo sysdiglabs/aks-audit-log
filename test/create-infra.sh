@@ -2,6 +2,9 @@
 
 # set -uf
 
+my_resource_group="${RESOURCE_GROUP:-aks-test-group}"
+my_cluster_name="${CLUSTER_NAME:-aks-test-cluster}"
+
 echo "Create infra"
 echo "Resource group: $my_resource_group"
 echo "Cluster name: $my_cluster_name"
@@ -27,9 +30,10 @@ while [ $result -eq 1 ] && [ $i -gt 0 ]; do
     #result=$?
     i=$((i-1))
     sleep 2
-    #echo -n "."
+    echo -n "."
 done
 
+echo
 az aks show --resource-group "$my_resource_group" --name "$my_cluster_name"  --query provisioningState -o tsv
 echo
 

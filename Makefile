@@ -1,20 +1,19 @@
 VERSION_TAG=$(shell git describe --tags $(git rev-list --tags --max-count=1))
-VERSION_MAJOR=$(shell echo "${VERSION_TAG}"  | sed 's/[^0-9]*\([0-9]\+.*\)/\1/' )
-VERSION_FULL=$(shell echo "${VERSION_TAG}"   | sed 's/[^0-9]*\([0-9]\+\).*/\1/' )
+VERSION_MAJOR=$(shell echo "${VERSION_TAG}"  | sed 's/v\([0-9]*\).*/\1/' )
+VERSION_FULL=$(shell echo "${VERSION_TAG}"   | sed 's/v\([0-9][0-9\.]*\).*/\1/' )
 
-INSTALLER_IMAGE=aks-audit-log-installer
+INSTALLER_IMAGE=sysdiglabs/aks-audit-log-installer
 INSTALLER_DIR=./
 INSTALLER_DESC=${INSTALLER_DIR}/build/README.md
 INSTALLER_DOCKERFILE=${INSTALLER_DIR}/build/Dockerfile
 
-FORWARDER_IMAGE=aks-audit-log-forwarder
+FORWARDER_IMAGE=sysdiglabs/aks-audit-log-forwarder
 FORWARDER_DIR=./AKSKubeAuditReceiverSolution
 FORWARDER_DESC=${FORWARDER_DIR}/AKSKubeAuditReceiver/README.md
 FORWARDER_DOCKERFILE=${FORWARDER_DIR}/AKSKubeAuditReceiver/Dockerfile
 
 DOCKERHUB_USERNAME=$(shell cat ${KEYS}/DOCKER_USER)
 DOCKERHUB_PASSWORD=$(shell cat ${KEYS}/DOCKER_PASS)
-DOCKERHUB_ORG=sysdiglabs
 
 GITHUB_USER=$(shell cat ${KEYS}/GH_USER)
 GITHUB_PAT_PATH="${KEYS}/GH_PAT_PKG"
@@ -29,21 +28,21 @@ SYSDIG_SECURE_API_TOKEN=$(shell cat ${KEYS}/SYSDIG_SECURE_API_TOKEN)
 
 installer-build-image: IMAGE_DIR=${INSTALLER_DIR}
 installer-build-image: IMAGE_DOCKERFILE=${INSTALLER_DOCKERFILE}
-installer-build-image: IMAGE=${DOCKERHUB_ORG}/${INSTALLER_IMAGE}
+installer-build-image: IMAGE=${INSTALLER_IMAGE}
 installer-build-image: build-image
 
 installer-build-push-dev:
-	docker build ${INSTALLER_DIR} -f ${INSTALLER_DOCKERFILE} -t ${DOCKERHUB_ORG}/${INSTALLER_IMAGE}:dev
-	docker push ${DOCKERHUB_ORG}/${INSTALLER_IMAGE}:dev
+	docker build ${INSTALLER_DIR} -f ${INSTALLER_DOCKERFILE} -t ${INSTALLER_IMAGE}:dev
+	docker push ${INSTALLER_IMAGE}:dev
 
-installer-scan: IMAGE=${DOCKERHUB_ORG}/${INSTALLER_IMAGE}
+installer-scan: IMAGE=${INSTALLER_IMAGE}
 installer-scan: inline-scan
 
-installer-dockerhub-readme: IMAGE=${DOCKERHUB_ORG}/${INSTALLER_IMAGE}
+installer-dockerhub-readme: IMAGE=${INSTALLER_IMAGE}
 installer-dockerhub-readme: DESC_PATH=${INSTALLER_DESC}
 installer-dockerhub-readme: update-dockerhub-readme
 
-installer-push: IMAGE=${DOCKERHUB_ORG}/${INSTALLER_IMAGE}
+installer-push: IMAGE=${INSTALLER_IMAGE}
 installer-push: check-shell installer-build-image installer-scan push
 
 installer-gh-pkg-release: IMAGE_NAME=${INSTALLER_IMAGE}
@@ -58,21 +57,21 @@ forwarder-test: check-yaml check-dotnet
 
 forwarder-build-image: IMAGE_DIR=${FORWARDER_DIR}
 forwarder-build-image: IMAGE_DOCKERFILE=${FORWARDER_DOCKERFILE}
-forwarder-build-image: IMAGE=${DOCKERHUB_ORG}/${FORWARDER_IMAGE}
+forwarder-build-image: IMAGE=${FORWARDER_IMAGE}
 forwarder-build-image: build-image
 
 forwarder-build-push-dev:
-	docker build ${FORWARDER_DIR} -f ${FORWARDER_DOCKERFILE} -t ${DOCKERHUB_ORG}/${FORWARDER_IMAGE}:dev
-	docker push ${DOCKERHUB_ORG}/${FORWARDER_IMAGE}:dev
+	docker build ${FORWARDER_DIR} -f ${FORWARDER_DOCKERFILE} -t ${FORWARDER_IMAGE}:dev
+	docker push ${FORWARDER_IMAGE}:dev
 
 forwarder-scan: IMAGE=${FORWARDER_IMAGE}
 forwarder-scan: inline-scan
 
-forwarder-dockerhub-readme: IMAGE=${DOCKERHUB_ORG}/${FORWARDER_IMAGE}
+forwarder-dockerhub-readme: IMAGE=${FORWARDER_IMAGE}
 forwarder-dockerhub-readme: DESC_PATH=${FORWARDER_DESC}
 forwarder-dockerhub-readme: update-dockerhub-readme
 
-forwarder-push: IMAGE=${DOCKERHUB_ORG}/${FORWARDER_IMAGE}
+forwarder-push: IMAGE=${FORWARDER_IMAGE}
 forwarder-push: forwarder-test forwarder-build forwarder-build-image forwarder-scan push
 
 forwarder-gh-pkg-release: IMAGE_NAME=${FORWARDER_IMAGE}
@@ -82,13 +81,13 @@ forwarder-gh-pkg-release: fowarder-test forwarder-build forwarder-build-image fo
 
 install:
 	docker run -it -v ${HOME}/.azure:/root/.azure \
-		${DOCKERHUB_ORG}/${INSTALLER_IMAGE}:${MINOR} \
+		${INSTALLER_IMAGE}:${MINOR} \
 		-g ${RESOURCE_GROUP} -c ${CLUSTER_NAME}
 
 uninstall:
 	docker run -it -v ${HOME}/.azure:/root/.azure \
 		--entrypoint /app/uninstall-aks-audit-log.sh \
-		${DOCKERHUB_ORG}/${INSTALLER_IMAGE}:${MINOR} \
+		${INSTALLER_IMAGE}:${MINOR} \
 		-g ${RESOURCE_GROUP} -c ${CLUSTER_NAME}
 
 # -----------------------------------------------------------------------------
@@ -133,20 +132,21 @@ all-tests: check build test-gh-actions
 
 show-version:
 	@echo "Version tag: ${VERSION_TAG}"
-	@echo "Version full: ${VERSION_FULL}"
 	@echo "Version major: ${VERSION_MAJOR}"
+	@echo "Version full: ${VERSION_FULL}"
+	
 
 build-image:
 	docker build ${IMAGE_DIR} -f ${IMAGE_DOCKERFILE} \
-		-t ${DOCKERHUB_ORG}/${IMAGE}:latest \
-		-t ${DOCKERHUB_ORG}/${IMAGE}:dev \
-		-t ${DOCKERHUB_ORG}/${IMAGE}:${VERSION_FULL} \
-		-t ${DOCKERHUB_ORG}/${IMAGE}:${VERSION_MAJOR}
+		-t ${IMAGE}:latest \
+		-t ${IMAGE}:dev \
+		-t ${IMAGE}:${VERSION_FULL} \
+		-t ${IMAGE}:${VERSION_MAJOR}
 
 push:
-	docker push ${DOCKERHUB_ORG}/${IMAGE}:latest
-	docker push ${DOCKERHUB_ORG}/${IMAGE}:${VERSION_FULL}
-	docker push ${DOCKERHUB_ORG}/${IMAGE}:${VERSION_MAJOR}
+	docker push ${IMAGE}:latest
+	docker push ${IMAGE}:${VERSION_FULL}
+	docker push ${IMAGE}:${VERSION_MAJOR}
 
 update-dockerhub-readme-docker:
 	echo 'Updating Dockerhub description' ; \
@@ -181,10 +181,17 @@ gh-pkg-release:
 	docker build . -f build/Dockerfile -t docker.pkg.github.com/${GITHUB_REPO}/${IMAGE_NAME}:${VERSION_FULL}
 	docker push docker.pkg.github.com/${GITHUB_REPO}/${IMAGE_NAME}:${VERSION_FULL}
 
+UNAME := $(shell uname)
 inline-scan:
-	@curl -s https://download.sysdig.com/stable/inline_scan.sh | \
-		bash -s -- \
-		analyze -s https://secure.sysdig.com -o -k ${SYSDIG_SECURE_API_TOKEN} ${IMAGE} ; \
+	if [ "${UNAME}"=="Darwin" ]; then DOCKER_USER="-u 0"; else DOCKER_USER=""; fi ; \
+	docker run $$DOCKER_USER --rm \
+		-v /var/run/docker.sock:/var/run/docker.sock \
+		quay.io/sysdig/secure-inline-scan:2 \
+		--sysdig-url https://secure.sysdig.com \
+		--sysdig-token "${SYSDIG_SECURE_API_TOKEN}" \
+		--storage-type docker-daemon \
+		--storage-path /var/run/docker.sock \
+		${IMAGE} ; \
 	RESULT=$$? ; \
 	echo ; echo "******************************" ; \
 	[ "$$RESULT" -eq 0 ] && echo "** Scan result  > PASS <    **" ; \

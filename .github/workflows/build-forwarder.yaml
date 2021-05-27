@@ -107,11 +107,18 @@ jobs:
         run: |
           docker build -f ./AKSKubeAuditReceiverSolution/AKSKubeAuditReceiver/Dockerfile \
             ./AKSKubeAuditReceiverSolution --tag sysdiglabs/aks-audit-log-forwarder
-      - name: Sysdig Secure inline image scan
-        uses: sysdiglabs/scan-action@v2
+      - name: Scan image
+        id: scan
+        uses: sysdiglabs/scan-action@v3
         with:
           image-tag: "sysdiglabs/aks-audit-log-forwarder"
           sysdig-secure-token: ${{ secrets.KUBELAB_SECURE_API_TOKEN }}
+          input-type: docker-daemon
+          run-as-user: root
+      - uses: github/codeql-action/upload-sarif@v1
+        if: always()
+        with:
+          sarif_file: ${{ steps.scan.outputs.sarifReport }}
 
   publish_image:
     name: Publish container image to registries
@@ -127,16 +134,17 @@ jobs:
       - name: Login to DockerHub
         uses: docker/login-action@v1 
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_PASSWORD }}
+          username: ${{ secrets.SYSDIGLABS_DOCKERHUB_USER }}
+          password: ${{ secrets.SYSDIGLABS_DOCKERHUB_TOKEN }}
       - name: Prepare version labels
         id: prepare_version_labels
         env:
           VERSION_TAG: ${{ github.event.release.tag_name }}
         run: |
           echo "Version tag: $VERSION_TAG"
-          VERSION_MAJOR=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+\).*/\1/')
-          VERSION_FULL=$(echo $VERSION_TAG | sed 's/[^0-9]*\([0-9]\+.*\)/\1/')
+          VERSION_MAJOR=$(echo $VERSION_TAG | sed 's/v\([0-9]*\).*/\1/' )
+          VERSION_FULL=$(echo $VERSION_TAG | sed 's/v\([0-9][0-9\.]*\).*/\1/' )
+          [ -z $VERSION_TAG ] && VERSION_FULL="master"
           [ -z $VERSION_FULL ] && VERSION_FULL="master"
           [ -z $VERSION_MAJOR ] && VERSION_MAJOR="dev"
           echo "Version major: $VERSION_MAJOR"

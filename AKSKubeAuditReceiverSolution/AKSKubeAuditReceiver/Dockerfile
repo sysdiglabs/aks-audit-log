@@ -36,9 +36,9 @@ RUN addgroup \
 
 RUN chown -R $USER:$USER .
 
-HEALTHCHECK --interval=10s --timeout=5s --retries=3 CMD wget localhost:1234/metrics -q -O - > /dev/null 2>&1
+HEALTHCHECK --interval=10s --timeout=5s --retries=3 CMD wget localhost:5000/metrics -q -O - > /dev/null 2>&1
 
 #Prometheus port
-EXPOSE 1234
+EXPOSE 5000
 
 ENTRYPOINT ["dotnet", "AKSKubeAuditReceiver.dll"]

@@ -1,5 +1,8 @@
 #!/bin/bash
 
+my_resource_group="${RESOURCE_GROUP:-aks-test-group}"
+my_cluster_name="${CLUSTER_NAME:-aks-test-cluster}"
+
 echo "Resource group: $my_resource_group"
 echo "Cluster name: $my_cluster_name"
 
