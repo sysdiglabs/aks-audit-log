@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This is de developmend documentation for the _AKS audit log_ integration. To read the _user documentation_, check the [main README.md] of this repo.
+This is the developmend documentation for the _AKS audit log_ integration. To read the _user documentation_, check the [main README.md] of this repo.
 
 ## Motivation
 
