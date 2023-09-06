@@ -210,9 +210,10 @@ function create_event_hubs {
     step=$((step + 1))
     echo "Creating Event Hub: $hub_name"
     az eventhubs eventhub create --name "$hub_name" \
+        --cleanup-policy Delete \
         --namespace-name "$ehubs_name" \
         --resource-group "$resource_group" \
-        --message-retention 1 \
+        --retention-time 1 \
         --partition-count 4 \
         --output none
 
