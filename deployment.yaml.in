@@ -37,7 +37,7 @@ spec:
             exec:
               command:
                 - wget
-                - localhost:5000/metrics
+                - 127.0.0.1:5000/metrics
                 - --spider
             initialDelaySeconds: 10
           livenessProbe:
